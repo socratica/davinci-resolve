@@ -5,13 +5,74 @@
 ### Methods
 
 ```python
-GetProjectManager() ⟶ ProjectManager
-# Returns the ProjectManager object, which provides access to project-related functions.
-```
+Fusion() ⟶ Fusion
+# Returns the Fusion object. Starting point for Fusion scripts.
 
-```python
-GetCurrentProject() ⟶ Project
-# Returns the current Project object that is active in DaVinci Resolve.
+GetMediaStorage() ⟶ MediaStorage
+# Returns the media storage object to query and act on media locations.
+
+GetProjectManager() ⟶ ProjectManager
+# Returns the project manager object for currently open database.
+
+OpenPage(pageName) ⟶ bool
+# Switches to indicated page in DaVinci Resolve.
+# Input can be one of ("media", "cut", "edit", "fusion", "color", "fairlight", "deliver").
+
+GetCurrentPage() ⟶ str
+# Returns the page currently displayed in the main window.
+# Returned value can be one of ("media", "cut", "edit", "fusion", "color", "fairlight", "deliver", None).
+
+GetProductName() ⟶ str
+# Returns product name.
+
+GetVersion() ⟶ list
+# Returns list of product version fields in [major, minor, patch, build, suffix] format.
+
+GetVersionString() ⟶ str
+# Returns product version in "major.minor.patch[suffix].build" format.
+
+LoadLayoutPreset(presetName) ⟶ bool
+# Loads UI layout from saved preset named 'presetName'.
+
+UpdateLayoutPreset(presetName) ⟶ bool
+# Overwrites preset named 'presetName' with current UI layout.
+
+ExportLayoutPreset(presetName, presetFilePath) ⟶ bool
+# Exports preset named 'presetName' to path 'presetFilePath'.
+
+DeleteLayoutPreset(presetName) ⟶ bool
+# Deletes preset named 'presetName'.
+
+SaveLayoutPreset(presetName) ⟶ bool
+# Saves current UI layout as a preset named 'presetName'.
+
+ImportLayoutPreset(presetFilePath, presetName=None) ⟶ bool
+# Imports preset from path 'presetFilePath'.
+# The optional argument 'presetName' specifies how the preset shall be named.
+# If not specified, the preset is named based on the filename.
+
+Quit() ⟶ None
+# Quits the Resolve App.
+
+ImportRenderPreset(presetPath) ⟶ bool
+# Import a preset from presetPath (string) and set it as current preset for rendering.
+
+ExportRenderPreset(presetName, exportPath) ⟶ bool
+# Export a preset to a given path (string) if presetName(string) exists.
+
+ImportBurnInPreset(presetPath) ⟶ bool
+# Import a data burn in preset from a given presetPath (string).
+
+ExportBurnInPreset(presetName, exportPath) ⟶ bool
+# Export a data burn in preset to a given path (string) if presetName (string) exists.
+
+GetKeyframeMode() ⟶ keyframeMode
+# Returns the currently set keyframe mode (int).
+# Refer to section 'Keyframe Mode information' below for details.
+
+SetKeyframeMode(keyframeMode) ⟶ bool
+# Returns True when 'keyframeMode' (enum) is successfully set.
+# Refer to section 'Keyframe Mode information' below for details.
 ```
 
 ---
@@ -21,31 +82,85 @@ GetCurrentProject() ⟶ Project
 ### Methods
 
 ```python
-CreateProject(projectName: str) ⟶ Project
-# Creates a new project with the specified name.
-# Returns the created Project object.
-```
+ArchiveProject(projectName, filePath, isArchiveSrcMedia=True, isArchiveRenderCache=True, isArchiveProxyMedia=False) ⟶ bool
+# Archives project to provided file path with the configuration as provided by the optional arguments.
 
-```python
-DeleteProject(projectName: str) ⟶ bool
-# Deletes the project with the specified name.
-# Returns `True` if the deletion was successful, `False` otherwise.
-```
+CreateProject(projectName) ⟶ Project
+# Creates and returns a project if projectName (string) is unique, and None if it is not.
 
-```python
-GetProjectList() ⟶ list
-# Returns a list of all available projects.
-```
+DeleteProject(projectName) ⟶ bool
+# Deletes the project in the current folder if not currently loaded.
 
-```python
-LoadProject(projectName: str) ⟶ Project
-# Loads the project with the specified name.
-# Returns the loaded Project object.
-```
+LoadProject(projectName) ⟶ Project
+# Loads and returns the project with name = projectName (string) if there is a match found, and None if there is no matching project.
 
-```python
 GetCurrentProject() ⟶ Project
-# Returns the currently active Project object.
+# Returns the currently loaded Resolve project.
+
+SaveProject() ⟶ bool
+# Saves the currently loaded project with its own name. Returns True if successful.
+
+CloseProject(project) ⟶ bool
+# Closes the specified project without saving.
+
+CreateFolder(folderName) ⟶ bool
+# Creates a folder if folderName (string) is unique.
+
+DeleteFolder(folderName) ⟶ bool
+# Deletes the specified folder if it exists. Returns True in case of success.
+
+GetProjectListInCurrentFolder() ⟶ list
+# Returns a list of project names in the current folder.
+
+GetFolderListInCurrentFolder() ⟶ list
+# Returns a list of folder names in the current folder.
+
+GotoRootFolder() ⟶ bool
+# Opens the root folder in the database.
+
+GotoParentFolder() ⟶ bool
+# Opens the parent folder of the current folder in the database if the current folder has a parent.
+
+GetCurrentFolder() ⟶ str
+# Returns the current folder name.
+
+OpenFolder(folderName) ⟶ bool
+# Opens the folder under the given name.
+
+ImportProject(filePath, projectName=None) ⟶ bool
+# Imports a project from the file path provided with the given project name, if any. Returns True if successful.
+
+ExportProject(projectName, filePath, withStillsAndLUTs=True) ⟶ bool
+# Exports the project to the provided file path, including stills and LUTs if withStillsAndLUTs is True (enabled by default). Returns True in case of success.
+
+RestoreProject(filePath, projectName=None) ⟶ bool
+# Restores a project from the file path provided with the given project name, if any. Returns True if successful.
+
+GetCurrentDatabase() ⟶ dict
+# Returns a dictionary (with keys 'DbType', 'DbName' and optional 'IpAddress') corresponding to the current database connection.
+
+GetDatabaseList() ⟶ list
+# Returns a list of dictionary items (with keys 'DbType', 'DbName' and optional 'IpAddress') corresponding to all the databases added to Resolve.
+
+SetCurrentDatabase(dbInfo) ⟶ bool
+# Switches the current database connection to the database specified by the keys below, and closes any open project.
+# 'DbType': 'Disk' or 'PostgreSQL' (string)
+# 'DbName': database name (string)
+# 'IpAddress': IP address of the PostgreSQL server (string, optional key - defaults to '127.0.0.1')
+
+CreateCloudProject(cloudSettings) ⟶ Project
+# Creates and returns a cloud project.
+# 'cloudSettings': Check 'Cloud Projects Settings' subsection below for more information.
+
+ImportCloudProject(filePath, cloudSettings) ⟶ bool
+# Returns True if importing the cloud project is successful; False otherwise.
+# 'filePath': String; filePath of the file to import
+# 'cloudSettings': Check 'Cloud Projects Settings' subsection below for more information.
+
+RestoreCloudProject(folderPath, cloudSettings) ⟶ bool
+# Returns True if restoring the cloud project is successful; False otherwise.
+# 'folderPath': String; path of the folder to restore
+# 'cloudSettings': Check 'Cloud Projects Settings' subsection below for more information.
 ```
 
 ---
@@ -55,32 +170,415 @@ GetCurrentProject() ⟶ Project
 ### Methods
 
 ```python
+GetMediaPool() ⟶ MediaPool
+# Returns the Media Pool object.
+
+GetTimelineCount() ⟶ int
+# Returns the number of timelines currently present in the project.
+
+GetTimelineByIndex(idx) ⟶ Timeline
+# Returns the timeline at the given index, 1 <= idx <= project.GetTimelineCount().
+
+GetCurrentTimeline() ⟶ Timeline
+# Returns the currently loaded timeline.
+
+SetCurrentTimeline(timeline) ⟶ bool
+# Sets the given timeline as the current timeline for the project. Returns True if successful.
+
+GetGallery() ⟶ Gallery
+# Returns the Gallery object.
+
 GetName() ⟶ str
-# Returns the name of the project.
+# Returns the project name.
+
+SetName(projectName) ⟶ bool
+# Sets the project name if the given projectName (string) is unique.
+
+GetPresetList() ⟶ list
+# Returns a list of presets and their information.
+
+SetPreset(presetName) ⟶ bool
+# Sets the preset by the given presetName (string) into the project.
+
+AddRenderJob() ⟶ str
+# Adds a render job based on current render settings to the render queue. Returns a unique job id (string) for the new render job.
+
+DeleteRenderJob(jobId) ⟶ bool
+# Deletes the render job for the input job id (string).
+
+DeleteAllRenderJobs() ⟶ bool
+# Deletes all render jobs in the queue.
+
+GetRenderJobList() ⟶ list
+# Returns a list of render jobs and their information.
+
+GetRenderPresetList() ⟶ list
+# Returns a list of render presets and their information.
+
+StartRendering(jobId1, jobId2, ...) ⟶ bool
+# Starts rendering jobs indicated by the input job ids.
+
+StartRendering([jobIds...], isInteractiveMode=False) ⟶ bool
+# Starts rendering jobs indicated by the input job ids.
+# The optional "isInteractiveMode", when set, enables error feedback in the UI during rendering.
+
+StartRendering(isInteractiveMode=False) ⟶ bool
+# Starts rendering all queued render jobs.
+# The optional "isInteractiveMode", when set, enables error feedback in the UI during rendering.
+
+StopRendering() ⟶ None
+# Stops any current render processes.
+
+IsRenderingInProgress() ⟶ bool
+# Returns True if rendering is in progress.
+
+LoadRenderPreset(presetName) ⟶ bool
+# Sets a preset as the current preset for rendering if presetName (string) exists.
+
+SaveAsNewRenderPreset(presetName) ⟶ bool
+# Creates a new render preset by the given name if presetName (string) is unique.
+
+SetRenderSettings(settings) ⟶ bool
+# Sets the given settings for rendering. Settings is a dict, with support for the keys:
+# Refer to "Looking up render settings" section for information for supported settings.
+
+GetRenderJobStatus(jobId) ⟶ dict
+# Returns a dict with job status and completion percentage of the job by the given jobId (string).
+
+GetSetting(settingName) ⟶ str
+# Returns the value of the project setting (indicated by settingName, string). Check the section below for more information.
+
+SetSetting(settingName, settingValue) ⟶ bool
+# Sets the project setting (indicated by settingName, string) to the value (settingValue, string). Check the section below for more information.
+
+GetRenderFormats() ⟶ dict
+# Returns a dict (format -> file extension) of available render formats.
+
+GetRenderCodecs(renderFormat) ⟶ dict
+# Returns a dict (codec description -> codec name) of available codecs for the given render format (string).
+
+GetCurrentRenderFormatAndCodec() ⟶ dict
+# Returns a dict with the currently selected format 'format' and render codec 'codec'.
+
+SetCurrentRenderFormatAndCodec(format, codec) ⟶ bool
+# Sets the given render format (string) and render codec (string) as options for rendering.
+
+GetCurrentRenderMode() ⟶ int
+# Returns the render mode: 0 - Individual clips, 1 - Single clip.
+
+SetCurrentRenderMode(renderMode) ⟶ bool
+# Sets the render mode. Specify renderMode = 0 for Individual clips, 1 for Single clip.
+
+GetRenderResolutions(format, codec) ⟶ list
+# Returns a list of resolutions applicable for the given render format (string) and render codec (string).
+# Returns a full list of resolutions if no argument is provided.
+# Each element in the list is a dictionary with 2 keys "Width" and "Height".
+
+RefreshLUTList() ⟶ bool
+# Refreshes LUT List.
+
+GetUniqueId() ⟶ str
+# Returns a unique ID for the project item.
+
+InsertAudioToCurrentTrackAtPlayhead(mediaPath, startOffsetInSamples, durationInSamples) ⟶ bool
+# Inserts the media specified by mediaPath (string) with startOffsetInSamples (int) and durationInSamples (int) at the playhead on a selected track on the Fairlight page.
+# Returns True if successful, otherwise False.
+
+LoadBurnInPreset(presetName) ⟶ bool
+# Loads user-defined data burn in preset for the project when supplied presetName (string). Returns True if successful.
+
+ExportCurrentFrameAsStill(filePath) ⟶ bool
+# Exports the current frame as still to the supplied filePath. filePath must end in a valid export file format.
+# Returns True if successful, otherwise False.
+
+GetColorGroupsList() ⟶ list
+# Returns a list of all group objects in the timeline.
+
+AddColorGroup(groupName) ⟶ ColorGroup
+# Creates a new ColorGroup. groupName must be a unique string.
+
+DeleteColorGroup(colorGroup) ⟶ bool
+# Deletes the given color group and sets clips to ungrouped.
 ```
 
-```python
-SetName(projectName: str) ⟶ bool
-# Sets a new name for the project.
-# Returns `True` if the name was successfully set, `False` otherwise.
-```
+## MediaStorage Class
+
+### Methods
 
 ```python
-GetRenderQueue() ⟶ list
-# Returns the list of render jobs in the project's render queue.
+GetMountedVolumeList() ⟶ list
+# Returns a list of folder paths corresponding to mounted volumes displayed in Resolve’s Media Storage.
+
+GetSubFolderList(folderPath) ⟶ list
+# Returns a list of folder paths in the given absolute folder path.
+
+GetFileList(folderPath) ⟶ list
+# Returns a list of media and file listings in the given absolute folder path.
+# Note that media listings may be logically consolidated entries.
+
+RevealInStorage(path) ⟶ bool
+# Expands and displays the given file/folder path in Resolve’s Media Storage.
+
+AddItemListToMediaPool(item1, item2, ...) ⟶ list
+# Adds specified file/folder paths from Media Storage into the current Media Pool folder.
+# Input is one or more file/folder paths. Returns a list of the MediaPoolItems created.
+
+AddItemListToMediaPool([items...]) ⟶ list
+# Adds specified file/folder paths from Media Storage into the current Media Pool folder.
+# Input is an array of file/folder paths. Returns a list of the MediaPoolItems created.
+
+AddItemListToMediaPool([{itemInfo}, ...]) ⟶ list
+# Adds a list of itemInfos specified as a dict of "media", "startFrame" (int), "endFrame" (int) from Media Storage into the current Media Pool folder.
+# Returns a list of the MediaPoolItems created.
+
+AddClipMattesToMediaPool(MediaPoolItem, [paths], stereoEye) ⟶ bool
+# Adds specified media files as mattes for the specified MediaPoolItem.
+# StereoEye is an optional argument for specifying which eye to add the matte to for stereo clips ("left" or "right").
+# Returns True if successful.
+
+AddTimelineMattesToMediaPool([paths]) ⟶ list
+# Adds specified media files as timeline mattes in the current media pool folder.
+# Returns a list of created MediaPoolItems.
 ```
 
-```python
-AddRenderJob(job: dict) ⟶ str
-# Adds a new render job to the render queue.
-# Returns the ID of the newly created job.
-```
+## MediaPool Class
+
+### Methods
 
 ```python
-DeleteRenderJob(jobId: str) ⟶ bool
-# Deletes the render job with the specified ID.
-# Returns `True` if the job was successfully deleted, `False` otherwise.
+GetRootFolder() ⟶ Folder
+# Returns root Folder of Media Pool.
+
+AddSubFolder(folder, name) ⟶ Folder
+# Adds a new subfolder under the specified Folder object with the given name.
+
+RefreshFolders() ⟶ bool
+# Updates the folders in collaboration mode.
+
+CreateEmptyTimeline(name) ⟶ Timeline
+# Adds a new timeline with the given name.
+
+AppendToTimeline(clip1, clip2, ...) ⟶ list
+# Appends specified MediaPoolItem objects in the current timeline.
+# Returns the list of appended TimelineItems.
+
+AppendToTimeline([clips]) ⟶ list
+# Appends specified MediaPoolItem objects in the current timeline.
+# Returns the list of appended TimelineItems.
+
+AppendToTimeline([{clipInfo}, ...]) ⟶ list
+# Appends a list of clipInfos specified as a dict of "mediaPoolItem", "startFrame" (int), "endFrame" (int), (optional) "mediaType" (int; 1 - Video only, 2 - Audio only), "trackIndex" (int), and "recordFrame" (int).
+# Returns the list of appended TimelineItems.
+
+CreateTimelineFromClips(name, clip1, clip2, ...) ⟶ Timeline
+# Creates a new timeline with the specified name, and appends the specified MediaPoolItem objects.
+
+CreateTimelineFromClips(name, [clips]) ⟶ Timeline
+# Creates a new timeline with the specified name, and appends the specified MediaPoolItem objects.
+
+CreateTimelineFromClips(name, [{clipInfo}]) ⟶ Timeline
+# Creates a new timeline with the specified name, appending the list of clipInfos specified as a dict of "mediaPoolItem", "startFrame" (int), "endFrame" (int), "recordFrame" (int).
+
+ImportTimelineFromFile(filePath, importOptions={}) ⟶ Timeline
+# Creates a timeline based on parameters within the given file (AAF/EDL/XML/FCPXML/DRT/ADL/OTIO) and optional importOptions dict, with support for the keys:
+# "timelineName": string, specifies the name of the timeline to be created. Not valid for DRT import.
+# "importSourceClips": bool, specifies whether source clips should be imported, True by default. Not valid for DRT import.
+# "sourceClipsPath": string, specifies a filesystem path to search for source clips if the media is inaccessible in their original path and if "importSourceClips" is True.
+# "sourceClipsFolders": list of Media Pool folder objects to search for source clips if the media is not present in the current folder and if "importSourceClips" is False. Not valid for DRT import.
+# "interlaceProcessing": bool, specifies whether to enable interlace processing on the imported timeline being created. Valid only for AAF import.
+
+DeleteTimelines([timeline]) ⟶ bool
+# Deletes specified timelines in the media pool.
+
+GetCurrentFolder() ⟶ Folder
+# Returns the currently selected Folder.
+
+SetCurrentFolder(Folder) ⟶ bool
+# Sets the current folder by the given Folder.
+
+DeleteClips([clips]) ⟶ bool
+# Deletes specified clips or timeline mattes in the media pool.
+
+ImportFolderFromFile(filePath, sourceClipsPath="") ⟶ bool
+# Returns True if import from the given DRB filePath is successful, False otherwise.
+# sourceClipsPath is a string that specifies a filesystem path to search for source clips if the media is inaccessible in their original path, empty by default.
+
+DeleteFolders([subfolders]) ⟶ bool
+# Deletes specified subfolders in the media pool.
+
+MoveClips([clips], targetFolder) ⟶ bool
+# Moves specified clips to the target folder.
+
+MoveFolders([folders], targetFolder) ⟶ bool
+# Moves specified folders to the target folder.
+
+GetClipMatteList(MediaPoolItem) ⟶ list
+# Gets mattes for the specified MediaPoolItem, as a list of paths to the matte files.
+
+GetTimelineMatteList(Folder) ⟶ list
+# Gets mattes in the specified Folder, as a list of MediaPoolItems.
+
+DeleteClipMattes(MediaPoolItem, [paths]) ⟶ bool
+# Deletes mattes based on their file paths for the specified MediaPoolItem. Returns True on success.
+
+RelinkClips([MediaPoolItem], folderPath) ⟶ bool
+# Updates the folder location of specified media pool clips with the specified folder path.
+
+UnlinkClips([MediaPoolItem]) ⟶ bool
+# Unlinks specified media pool clips.
+
+ImportMedia([items...]) ⟶ list
+# Imports specified file/folder paths into the current Media Pool folder. Input is an array of file/folder paths.
+# Returns a list of the MediaPoolItems created.
+
+ImportMedia([{clipInfo}]) ⟶ list
+# Imports file path(s) into the current Media Pool folder as specified in the list of clipInfo dict.
+# Returns a list of the MediaPoolItems created.
+# Each clipInfo gets imported as one MediaPoolItem unless 'Show Individual Frames' is turned on.
+# Example: ImportMedia([{"FilePath":"file_%03d.dpx", "StartIndex":1, "EndIndex":100}]) would import clip "file_[001-100].dpx".
+
+ExportMetadata(fileName, [clips]) ⟶ bool
+# Exports metadata of specified clips to 'fileName' in CSV format.
+# If no clips are specified, all clips from the media pool will be used.
+
+GetUniqueId() ⟶ str
+# Returns a unique ID for the media pool.
+
+CreateStereoClip(LeftMediaPoolItem, RightMediaPoolItem) ⟶ MediaPoolItem
+# Takes in two existing media pool items and creates a new 3D stereoscopic media pool entry, replacing the input media in the media pool.
 ```
+
+## Folder Class
+
+### Methods
+
+```python
+GetClipList() ⟶ list
+# Returns a list of clips (items) within the folder.
+
+GetName() ⟶ str
+# Returns the media folder name.
+
+GetSubFolderList() ⟶ list
+# Returns a list of subfolders in the folder.
+
+GetIsFolderStale() ⟶ bool
+# Returns true if the folder is stale in collaboration mode, false otherwise.
+
+GetUniqueId() ⟶ str
+# Returns a unique ID for the media pool folder.
+
+Export(filePath) ⟶ bool
+# Returns true if export of DRB folder to filePath is successful, false otherwise.
+
+TranscribeAudio() ⟶ bool
+# Transcribes audio of the MediaPoolItems within the folder and nested folders.
+# Returns True if successful; False otherwise.
+
+ClearTranscription() ⟶ bool
+# Clears audio transcription of the MediaPoolItems within the folder and nested folders.
+# Returns True if successful; False otherwise.
+```
+
+## MediaPoolItem Class
+
+### Methods
+
+```python
+GetName() ⟶ str
+# Returns the clip name.
+
+GetMetadata(metadataType=None) ⟶ str | dict
+# Returns the metadata value for the key 'metadataType'.
+# If no argument is specified, a dict of all set metadata properties is returned.
+
+SetMetadata(metadataType, metadataValue) ⟶ bool
+# Sets the given metadata to metadataValue (string). Returns True if successful.
+
+SetMetadata(metadata) ⟶ bool
+# Sets the item metadata with the specified 'metadata' dict. Returns True if successful.
+
+GetMediaId() ⟶ str
+# Returns the unique ID for the MediaPoolItem.
+
+AddMarker(frameId, color, name, note, duration, customData) ⟶ bool
+# Creates a new marker at the given frameId position with the specified marker information.
+# 'customData' is optional and helps to attach user-specific data to the marker.
+
+GetMarkers() ⟶ dict
+# Returns a dict (frameId -> {information}) of all markers and dicts with their information.
+# Example of output format: {96.0: {'color': 'Green', 'duration': 1.0, 'note': '', 'name': 'Marker 1', 'customData': ''}, ...}
+# In the above example - there is one 'Green' marker at offset 96 (position of the marker).
+
+GetMarkerByCustomData(customData) ⟶ dict
+# Returns marker {information} for the first matching marker with the specified customData.
+
+UpdateMarkerCustomData(frameId, customData) ⟶ bool
+# Updates customData (string) for the marker at the given frameId position.
+# CustomData is not exposed via UI and is useful for scripting developers to attach any user-specific data to markers.
+
+GetMarkerCustomData(frameId) ⟶ str
+# Returns the customData string for the marker at the given frameId position.
+
+DeleteMarkersByColor(color) ⟶ bool
+# Deletes all markers of the specified color from the media pool item. "All" as an argument deletes all color markers.
+
+DeleteMarkerAtFrame(frameNum) ⟶ bool
+# Deletes the marker at the specified frame number from the media pool item.
+
+DeleteMarkerByCustomData(customData) ⟶ bool
+# Deletes the first matching marker with the specified customData.
+
+AddFlag(color) ⟶ bool
+# Adds a flag with the specified color (string).
+
+GetFlagList() ⟶ list
+# Returns a list of flag colors assigned to the item.
+
+ClearFlags(color) ⟶ bool
+# Clears the flag of the specified color if one exists. An "All" argument is supported and clears all flags.
+
+GetClipColor() ⟶ str
+# Returns the item color as a string.
+
+SetClipColor(colorName) ⟶ bool
+# Sets the item color based on the colorName (string).
+
+ClearClipColor() ⟶ bool
+# Clears the item color.
+
+GetClipProperty(propertyName=None) ⟶ str | dict
+# Returns the property value for the key 'propertyName'.
+# If no argument is specified, a dict of all clip properties is returned.
+
+SetClipProperty(propertyName, propertyValue) ⟶ bool
+# Sets the given property to propertyValue (string).
+
+LinkProxyMedia(proxyMediaFilePath) ⟶ bool
+# Links proxy media located at the path specified by the argument 'proxyMediaFilePath' with the current clip.
+# 'proxyMediaFilePath' should be an absolute clip path.
+
+UnlinkProxyMedia() ⟶ bool
+# Unlinks any proxy media associated with the clip.
+
+ReplaceClip(filePath) ⟶ bool
+# Replaces the underlying asset and metadata of the MediaPoolItem with the specified absolute clip path.
+
+GetUniqueId() ⟶ str
+# Returns a unique ID for the media pool item.
+
+TranscribeAudio() ⟶ bool
+# Transcribes audio of the MediaPoolItem. Returns True if successful; False otherwise.
+
+ClearTranscription() ⟶ bool
+# Clears audio transcription of the MediaPoolItem. Returns True if successful; False otherwise.
+
+GetAudioMapping() ⟶ str (json formatted)
+# Returns a string with the MediaPoolItem's audio mapping information.
+# Check the 'Audio Mapping' section below for more information.
+```
+
+---
 
 ## Timeline Class
 
@@ -88,50 +586,211 @@ DeleteRenderJob(jobId: str) ⟶ bool
 
 ```python
 GetName() ⟶ str
-# Returns the name of the timeline.
-```
+# Returns the timeline name.
 
-```python
-SetName(timelineName: str) ⟶ bool
-# Sets a new name for the timeline.
-# Returns `True` if the name was successfully set, `False` otherwise.
-```
+SetName(timelineName) ⟶ bool
+# Sets the timeline name if timelineName (string) is unique. Returns True if successful.
 
-```python
-GetTrackCount(trackType: str) ⟶ int
-# Returns the number of tracks of the specified type in the timeline.
-# - trackType can be "video", "audio", or "subtitle".
-```
+GetStartFrame() ⟶ int
+# Returns the frame number at the start of the timeline.
 
-```python
-GetItemListInTrack(trackType: str, trackIndex: int) ⟶ list
-# Returns a list of items in the specified track.
-# - trackType can be "video", "audio", or "subtitle".
-```
+GetEndFrame() ⟶ int
+# Returns the frame number at the end of the timeline.
 
-```python
-InsertTrack(trackType: str, index: int) ⟶ bool
-# Inserts a new track at the specified index.
-# - trackType can be "video", "audio", or "subtitle".
-# Returns `True` if the track was successfully inserted, `False` otherwise.
-```
+SetStartTimecode(timecode) ⟶ bool
+# Sets the start timecode of the timeline to the string 'timecode'.
+# Returns True when the change is successful, false otherwise.
 
-```python
-DeleteTrack(trackType: str, index: int) ⟶ bool
-# Deletes the track at the specified index.
-# - trackType can be "video", "audio", or "subtitle".
-# Returns `True` if the track was successfully deleted, `False` otherwise.
-```
+GetStartTimecode() ⟶ str
+# Returns the start timecode for the timeline.
 
-```python
-GetItemByIndex(trackType: str, trackIndex: int, itemIndex: int) ⟶ TimelineItem
-# Returns the TimelineItem at the specified index within the track.
-```
+GetTrackCount(trackType) ⟶ int
+# Returns the number of tracks for the given track type ("audio", "video" or "subtitle").
 
-```python
-AppendItem(item: MediaPoolItem) ⟶ bool
-# Appends a MediaPoolItem to the timeline.
-# Returns `True` if the item was successfully appended, `False` otherwise.
+AddTrack(trackType, subTrackType) ⟶ bool
+# Adds a track of trackType ("video", "subtitle", "audio").
+# Optional argument subTrackType is used for "audio" trackType.
+# subTrackType can be one of {"mono", "stereo", "5.1", "5.1film", "7.1", "7.1film", "adaptive1", ... , "adaptive24"}.
+# subTrackType defaults to 'mono' if skipped and track type is ‘audio’.
+
+AddTrack(trackType, newTrackOptions) ⟶ bool
+# Adds a track of trackType ("video", "subtitle", "audio").
+# Optional newTrackOptions = {'audioType': same as subTrackType above, 'index': 1 <= index <= GetTrackCount(trackType)}.
+# 'audioType' defaults to 'mono' if skipped and track type is ‘audio’.
+# 'index' if skipped (or if value not in bounds) appends the track.
+
+DeleteTrack(trackType, trackIndex) ⟶ bool
+# Deletes a track of trackType ("video", "subtitle", "audio") and given trackIndex.
+# 1 <= trackIndex <= GetTrackCount(trackType).
+
+SetTrackEnable(trackType, trackIndex, Bool) ⟶ bool
+# Enables/Disables a track with given trackType and trackIndex.
+# trackType is one of {"audio", "video", "subtitle"}.
+# 1 <= trackIndex <= GetTrackCount(trackType).
+
+GetIsTrackEnabled(trackType, trackIndex) ⟶ bool
+# Returns True if the track with given trackType and trackIndex is enabled, and False otherwise.
+# trackType is one of {"audio", "video", "subtitle"}.
+# 1 <= trackIndex <= GetTrackCount(trackType).
+
+SetTrackLock(trackType, trackIndex, Bool) ⟶ bool
+# Locks/Unlocks a track with given trackType and trackIndex.
+# trackType is one of {"audio", "video", "subtitle"}.
+# 1 <= trackIndex <= GetTrackCount(trackType).
+
+GetIsTrackLocked(trackType, trackIndex) ⟶ bool
+# Returns True if the track with given trackType and trackIndex is locked, and False otherwise.
+# trackType is one of {"audio", "video", "subtitle"}.
+# 1 <= trackIndex <= GetTrackCount(trackType).
+
+DeleteClips([timelineItems], Bool) ⟶ bool
+# Deletes specified TimelineItems from the timeline, performing ripple delete if the second argument is True.
+# The second argument is optional (defaults to False).
+
+SetClipsLinked([timelineItems], Bool) ⟶ bool
+# Links or unlinks the specified TimelineItems depending on the second argument.
+
+GetItemListInTrack(trackType, index) ⟶ list
+# Returns a list of timeline items on that track (based on trackType and index).
+# 1 <= index <= GetTrackCount(trackType).
+
+AddMarker(frameId, color, name, note, duration, customData) ⟶ bool
+# Creates a new marker at the given frameId position with the specified marker information.
+# 'customData' is optional and helps to attach user-specific data to the marker.
+
+GetMarkers() ⟶ dict
+# Returns a dict (frameId -> {information}) of all markers and dicts with their information.
+# Example: {96.0: {'color': 'Green', 'duration': 1.0, 'note': '', 'name': 'Marker 1', 'customData': ''}, ...}
+# In the above example - there is one 'Green' marker at offset 96 (position of the marker).
+
+GetMarkerByCustomData(customData) ⟶ dict
+# Returns marker {information} for the first matching marker with the specified customData.
+
+UpdateMarkerCustomData(frameId, customData) ⟶ bool
+# Updates customData (string) for the marker at the given frameId position.
+# CustomData is not exposed via UI and is useful for scripting developers to attach any user-specific data to markers.
+
+GetMarkerCustomData(frameId) ⟶ str
+# Returns the customData string for the marker at the given frameId position.
+
+DeleteMarkersByColor(color) ⟶ bool
+# Deletes all timeline markers of the specified color.
+# An "All" argument is supported and deletes all timeline markers.
+
+DeleteMarkerAtFrame(frameNum) ⟶ bool
+# Deletes the timeline marker at the given frame number.
+
+DeleteMarkerByCustomData(customData) ⟶ bool
+# Deletes the first matching marker with the specified customData.
+
+ApplyGradeFromDRX(path, gradeMode, item1, item2, ...) ⟶ bool
+# Loads a still from the given file path (string) and applies grade to Timeline Items with gradeMode (int):
+# 0 - "No keyframes", 1 - "Source Timecode aligned", 2 - "Start Frames aligned".
+
+ApplyGradeFromDRX(path, gradeMode, [items]) ⟶ bool
+# Loads a still from the given file path (string) and applies grade to Timeline Items with gradeMode (int):
+# 0 - "No keyframes", 1 - "Source Timecode aligned", 2 - "Start Frames aligned".
+
+GetCurrentTimecode() ⟶ str
+# Returns a string timecode representation for the current playhead position on Cut, Edit, Color, Fairlight, and Deliver pages.
+
+SetCurrentTimecode(timecode) ⟶ bool
+# Sets the current playhead position from input timecode on Cut, Edit, Color, Fairlight, and Deliver pages.
+
+GetCurrentVideoItem() ⟶ item
+# Returns the current video timeline item.
+
+GetCurrentClipThumbnailImage() ⟶ dict
+# Returns a dict (keys "width", "height", "format" and "data") with data containing raw thumbnail image data (RGB 8-bit image data encoded in base64 format) for current media in the Color Page.
+# An example of how to retrieve and interpret thumbnails is provided in 6_get_current_media_thumbnail.py in the Examples folder.
+
+GetTrackName(trackType, trackIndex) ⟶ str
+# Returns the track name for the track indicated by trackType ("audio", "video" or "subtitle") and index.
+# 1 <= trackIndex <= GetTrackCount(trackType).
+
+SetTrackName(trackType, trackIndex, name) ⟶ bool
+# Sets the track name (string) for the track indicated by trackType ("audio", "video" or "subtitle") and index.
+# 1 <= trackIndex <= GetTrackCount(trackType).
+
+DuplicateTimeline(timelineName) ⟶ Timeline
+# Duplicates the timeline and returns the created timeline, with the (optional) timelineName, on success.
+
+CreateCompoundClip([timelineItems], clipInfo={}) ⟶ TimelineItem
+# Creates a compound clip of input timeline items with an optional clipInfo map: {"startTimecode" : "00:00:00:00", "name" : "Compound Clip 1"}.
+# It returns the created timeline item.
+
+CreateFusionClip([timelineItems]) ⟶ TimelineItem
+# Creates a Fusion clip of input timeline items.
+# It returns the created timeline item.
+
+ImportIntoTimeline(filePath, importOptions={}) ⟶ bool
+# Imports timeline items from an AAF file and optional importOptions dict into the timeline, with support for the keys:
+# "autoImportSourceClipsIntoMediaPool": bool, specifies if source clips should be imported into the media pool, True by default.
+# "ignoreFileExtensionsWhenMatching": bool, specifies if file extensions should be ignored when matching, False by default.
+# "linkToSourceCameraFiles": bool, specifies if link to source camera files should be enabled, False by default.
+# "useSizingInfo": bool, specifies if sizing information should be used, False by default.
+# "importMultiChannelAudioTracksAsLinkedGroups": bool, specifies if multi-channel audio tracks should be imported as linked groups, False by default.
+# "insertAdditionalTracks": bool, specifies if additional tracks should be inserted, True by default.
+# "insertWithOffset": str, specifies insert with offset value in timecode format - defaults to "00:00:00:00", applicable if "insertAdditionalTracks" is False.
+# "sourceClipsPath": str, specifies a filesystem path to search for source clips if the media is inaccessible in their original path and if "ignoreFileExtensionsWhenMatching" is True.
+# "sourceClipsFolders": str, list of Media Pool folder objects to search for source clips if the media is not present in current folder.
+
+Export(fileName, exportType, exportSubtype) ⟶ bool
+# Exports timeline to 'fileName' as per input exportType & exportSubtype format.
+# Refer to section "Looking up timeline export properties" for information on the parameters.
+
+GetSetting(settingName) ⟶ str
+# Returns value of timeline setting (indicated by settingName : string). Check the section below for more information.
+
+SetSetting(settingName, settingValue) ⟶ bool
+# Sets timeline setting (indicated by settingName : string) to the value (settingValue : string). Check the section below for more information.
+
+InsertGeneratorIntoTimeline(generatorName) ⟶ TimelineItem
+# Inserts a generator (indicated by generatorName : string) into the timeline.
+
+InsertFusionGeneratorIntoTimeline(generatorName) ⟶ TimelineItem
+# Inserts a Fusion generator (indicated by generatorName : string) into the timeline.
+
+InsertFusionCompositionIntoTimeline() ⟶ TimelineItem
+# Inserts a Fusion composition into the timeline.
+
+InsertOFXGeneratorIntoTimeline(generatorName) ⟶ TimelineItem
+# Inserts an OFX generator (indicated by generatorName : string) into the timeline.
+
+InsertTitleIntoTimeline(titleName) ⟶ TimelineItem
+# Inserts a title (indicated by titleName : string) into the timeline.
+
+InsertFusionTitleIntoTimeline(titleName) ⟶ TimelineItem
+# Inserts a Fusion title (indicated by titleName : string) into the timeline.
+
+GrabStill() ⟶ GalleryStill
+# Grabs still from the current video clip. Returns a GalleryStill object.
+
+GrabAllStills(stillFrameSource) ⟶ list
+# Grabs stills from all the clips of the timeline at 'stillFrameSource' (1 - First frame, 2 - Middle frame).
+# Returns the list of GalleryStill objects.
+
+GetUniqueId() ⟶ str
+# Returns a unique ID for the timeline.
+
+CreateSubtitlesFromAudio(autoCaptionSettings={}) ⟶ bool
+# Creates subtitles from audio for the timeline.
+# Takes in an optional dictionary autoCaptionSettings. Check 'Auto Caption Settings' subsection below for more information.
+# Returns True on success, False otherwise.
+
+DetectSceneCuts() ⟶ bool
+# Detects and makes scene cuts along the timeline. Returns True if successful, False otherwise.
+
+ConvertTimelineToStereo() ⟶ bool
+# Converts timeline to stereo. Returns True if successful; False otherwise.
+
+GetNodeGraph() ⟶ Graph
+# Returns the timeline's node graph object.
+
+AnalyzeDolbyVision(timelineItems=[], analysisType=None) ⟶ bool
+# Analyzes Dolby Vision on clips present on the timeline. Returns True if analysis start is successful; False otherwise.
+# If timelineItems is empty, analysis is performed on all items. Else, analysis is performed on timelineItems only.
+# Set analysisType to resolve.DLB_BLEND_SHOTS for blend setting.
 ```
 
 ---
@@ -142,1300 +801,335 @@ AppendItem(item: MediaPoolItem) ⟶ bool
 
 ```python
 GetName() ⟶ str
-# Returns the name of the timeline item.
-```
+# Returns the item name.
 
-```python
-SetName(itemName: str) ⟶ bool
-# Sets a new name for the timeline item.
-# Returns `True` if the name was successfully set, `False` otherwise.
-```
+GetDuration() ⟶ int
+# Returns the item duration.
 
-```python
-GetStart() ⟶ int
-# Returns the start frame of the timeline item.
-```
-
-```python
 GetEnd() ⟶ int
-# Returns the end frame of the timeline item.
-```
+# Returns the end frame position on the timeline.
 
-```python
-GetDuration() ⟶ int
-# Returns the duration of the timeline item in frames.
-```
+GetFusionCompCount() ⟶ int
+# Returns the number of Fusion compositions associated with the timeline item.
 
-```python
-SetStart(startFrame: int) ⟶ bool
-# Sets the start frame of the timeline item.
-# Returns `True` if the start frame was successfully set, `False` otherwise.
-```
+GetFusionCompByIndex(compIndex) ⟶ FusionComp
+# Returns the Fusion composition object based on the given index.
+# 1 <= compIndex <= timelineItem.GetFusionCompCount()
 
-```python
-SetEnd(endFrame: int) ⟶ bool
-# Sets the end frame of the timeline item.
-# Returns `True` if the end frame was successfully set, `False` otherwise.
-```
+GetFusionCompNameList() ⟶ list
+# Returns a list of Fusion composition names associated with the timeline item.
 
-```python
-SetDuration(duration: int) ⟶ bool
-# Sets the duration of the timeline item in frames.
-# Returns `True` if the duration was successfully set, `False` otherwise.
-```
+GetFusionCompByName(compName) ⟶ FusionComp
+# Returns the Fusion composition object based on the given name.
 
-## MediaPool Class
+GetLeftOffset() ⟶ int
+# Returns the maximum extension by frame for the clip from the left side.
 
-### Methods
+GetRightOffset() ⟶ int
+# Returns the maximum extension by frame for the clip from the right side.
 
-```python
-ImportMedia(filePath: str) ⟶ MediaPoolItem
-# Imports a media file from the specified file path into the Media Pool.
-# Returns the imported MediaPoolItem.
-```
+GetStart() ⟶ int
+# Returns the start frame position on the timeline.
 
-```python
-DeleteMediaPoolItem(mediaPoolItem: MediaPoolItem) ⟶ bool
-# Deletes the specified MediaPoolItem from the Media Pool.
-# Returns `True` if the item was successfully deleted, `False` otherwise.
-```
+SetProperty(propertyKey, propertyValue) ⟶ bool
+# Sets the value of property "propertyKey" to value "propertyValue".
+# Refer to "Looking up Timeline item properties" for more information.
 
-```python
-MoveMediaPoolItem(mediaPoolItem: MediaPoolItem, targetBin: MediaBin) ⟶ bool
-# Moves the specified MediaPoolItem to the target MediaBin.
-# Returns `True` if the item was successfully moved, `False` otherwise.
-```
+GetProperty(propertyKey=None) ⟶ int | dict
+# Returns the value of the specified key.
+# If no key is specified, the method returns a dictionary (Python) or table (Lua) for all supported keys.
 
-```python
-GetRootFolder() ⟶ MediaBin
-# Returns the root MediaBin of the Media Pool.
-```
+AddMarker(frameId, color, name, note, duration, customData) ⟶ bool
+# Creates a new marker at the given frameId position with the specified marker information.
+# 'customData' is optional and helps to attach user-specific data to the marker.
 
-```python
-CreateFolder(folderName: str) ⟶ MediaBin
-# Creates a new folder in the Media Pool with the specified name.
-# Returns the created MediaBin.
-```
+GetMarkers() ⟶ dict
+# Returns a dict (frameId -> {information}) of all markers and dicts with their information.
+# Example: a value of {96.0: {'color': 'Green', 'duration': 1.0, 'note': '', 'name': 'Marker 1', 'customData': ''}, ...}
+# indicates a single green marker at clip offset 96.
 
-```python
-DeleteFolder(mediaBin: MediaBin) ⟶ bool
-# Deletes the specified MediaBin from the Media Pool.
-# Returns `True` if the folder was successfully deleted, `False` otherwise.
-```
+GetMarkerByCustomData(customData) ⟶ dict
+# Returns marker {information} for the first matching marker with the specified customData.
 
-```python
-GetCurrentFolder() ⟶ MediaBin
-# Returns the currently active MediaBin.
-```
+UpdateMarkerCustomData(frameId, customData) ⟶ bool
+# Updates customData (string) for the marker at the given frameId position.
+# CustomData is not exposed via UI and is useful for scripting developers to attach any user-specific data to markers.
 
-```python
-SetCurrentFolder(mediaBin: MediaBin) ⟶ bool
-# Sets the specified MediaBin as the currently active folder in the Media Pool.
-# Returns `True` if the folder was successfully set, `False` otherwise.
-```
+GetMarkerCustomData(frameId) ⟶ str
+# Returns the customData string for the marker at the given frameId position.
 
----
+DeleteMarkersByColor(color) ⟶ bool
+# Deletes all markers of the specified color from the timeline item.
+# "All" as an argument deletes all color markers.
 
-## MediaBin Class
+DeleteMarkerAtFrame(frameNum) ⟶ bool
+# Deletes the marker at the specified frame number from the timeline item.
 
-### Methods
+DeleteMarkerByCustomData(customData) ⟶ bool
+# Deletes the first matching marker with the specified customData.
 
-```python
-GetName() ⟶ str
-# Returns the name of the MediaBin.
-```
+AddFlag(color) ⟶ bool
+# Adds a flag with the given color (string).
 
-```python
-SetName(folderName: str) ⟶ bool
-# Sets a new name for the MediaBin.
-# Returns `True` if the name was successfully set, `False` otherwise.
-```
+GetFlagList() ⟶ list
+# Returns a list of flag colors assigned to the item.
 
-```python
-GetClipCount() ⟶ int
-# Returns the number of clips in the MediaBin.
-```
+ClearFlags(color) ⟶ bool
+# Clears the flags of the specified color.
+# An "All" argument is supported to clear all flags.
 
-```python
-GetClipByIndex(index: int) ⟶ MediaPoolItem
-# Returns the MediaPoolItem at the specified index within the MediaBin.
-```
-
-```python
-GetClips() ⟶ list
-# Returns a list of all MediaPoolItems in the MediaBin.
-```
-
-```python
-DeleteClip(mediaPoolItem: MediaPoolItem) ⟶ bool
-# Deletes the specified MediaPoolItem from the MediaBin.
-# Returns `True` if the item was successfully deleted, `False` otherwise.
-```
-
-```python
-MoveClip(mediaPoolItem: MediaPoolItem, targetBin: MediaBin) ⟶ bool
-# Moves the specified MediaPoolItem to another MediaBin.
-# Returns `True` if the item was successfully moved, `False` otherwise.
-```
-
-## MediaPoolItem Class
-
-### Methods
-
-```python
-GetName() ⟶ str
-# Returns the name of the MediaPoolItem.
-```
-
-```python
-SetName(itemName: str) ⟶ bool
-# Sets a new name for the MediaPoolItem.
-# Returns `True` if the name was successfully set, `False` otherwise.
-```
-
-```python
-GetMediaPath() ⟶ str
-# Returns the file path of the media associated with the MediaPoolItem.
-```
-
-```python
-GetDuration() ⟶ int
-# Returns the duration of the MediaPoolItem in frames.
-```
-
-```python
 GetClipColor() ⟶ str
-# Returns the color label of the MediaPoolItem.
+# Returns the item color as a string.
+
+SetClipColor(colorName) ⟶ bool
+# Sets the item color based on the colorName (string).
+
+ClearClipColor() ⟶ bool
+# Clears the item color.
+
+AddFusionComp() ⟶ FusionComp
+# Adds a new Fusion composition associated with the timeline item.
+
+ImportFusionComp(path) ⟶ FusionComp
+# Imports a Fusion composition from the given file path by creating and adding a new composition for the item.
+
+ExportFusionComp(path, compIndex) ⟶ bool
+# Exports the Fusion composition based on the given index to the path provided.
+
+DeleteFusionCompByName(compName) ⟶ bool
+# Deletes the named Fusion composition.
+
+LoadFusionCompByName(compName) ⟶ FusionComp
+# Loads the named Fusion composition as the active composition.
+
+RenameFusionCompByName(oldName, newName) ⟶ bool
+# Renames the Fusion composition identified by oldName.
+
+AddVersion(versionName, versionType) ⟶ bool
+# Adds a new color version for a video clip based on versionType (0 - local, 1 - remote).
+
+GetCurrentVersion() ⟶ dict
+# Returns the current version of the video clip.
+# The returned value will have the keys versionName and versionType (0 - local, 1 - remote).
+
+DeleteVersionByName(versionName, versionType) ⟶ bool
+# Deletes a color version by name and versionType (0 - local, 1 - remote).
+
+LoadVersionByName(versionName, versionType) ⟶ bool
+# Loads a named color version as the active version.
+# versionType: 0 - local, 1 - remote.
+
+RenameVersionByName(oldName, newName, versionType) ⟶ bool
+# Renames the color version identified by oldName and versionType (0 - local, 1 - remote).
+
+GetVersionNameList(versionType) ⟶ list
+# Returns a list of all color versions for the given versionType (0 - local, 1 - remote).
+
+GetMediaPoolItem() ⟶ MediaPoolItem
+# Returns the media pool item corresponding to the timeline item if one exists.
+
+GetStereoConvergenceValues() ⟶ dict
+# Returns a dict (offset -> value) of keyframe offsets and respective convergence values.
+
+GetStereoLeftFloatingWindowParams() ⟶ dict
+# For the LEFT eye -> returns a dict (offset -> dict) of keyframe offsets and respective floating window params.
+# Value at a particular offset includes the left, right, top, and bottom floating window values.
+
+GetStereoRightFloatingWindowParams() ⟶ dict
+# For the RIGHT eye -> returns a dict (offset -> dict) of keyframe offsets and respective floating window params.
+# Value at a particular offset includes the left, right, top, and bottom floating window values.
+
+ApplyArriCdlLut() ⟶ bool
+# Applies ARRI CDL and LUT. Returns True if successful, False otherwise.
+
+SetCDL(CDL_map) ⟶ bool
+# Keys of map are: "NodeIndex", "Slope", "Offset", "Power", "Saturation", where 1 <= NodeIndex <= total number of nodes.
+
+AddTake(mediaPoolItem, startFrame=None, endFrame=None) ⟶ bool
+# Adds mediaPoolItem as a new take. Initializes a take selector for the timeline item if needed.
+# By default, the full clip extents are added. startFrame (int) and endFrame (int) are optional arguments used to specify the extents.
+
+GetSelectedTakeIndex() ⟶ int
+# Returns the index of the currently selected take, or 0 if the clip is not a take selector.
+
+GetTakesCount() ⟶ int
+# Returns the number of takes in take selector, or 0 if the clip is not a take selector.
+
+GetTakeByIndex(idx) ⟶ dict
+# Returns a dict (keys "startFrame", "endFrame" and "mediaPoolItem") with take info for the specified index.
+
+DeleteTakeByIndex(idx) ⟶ bool
+# Deletes a take by index, 1 <= idx <= number of takes.
+
+SelectTakeByIndex(idx) ⟶ bool
+# Selects a take by index, 1 <= idx <= number of takes.
+
+FinalizeTake() ⟶ bool
+# Finalizes take selection.
+
+CopyGrades(tgtTimelineItems) ⟶ bool
+# Copies the current node stack layer grade to the same layer for each item in tgtTimelineItems.
+# Returns True if successful.
+
+SetClipEnabled(enabled) ⟶ bool
+# Sets clip enabled status based on the argument (True/False).
+
+GetClipEnabled() ⟶ bool
+# Gets clip enabled status.
+
+UpdateSidecar() ⟶ bool
+# Updates the sidecar file for BRAW clips or RMD file for R3D clips.
+
+GetUniqueId() ⟶ str
+# Returns a unique ID for the timeline item.
+
+LoadBurnInPreset(presetName) ⟶ bool
+# Loads user-defined data burn-in preset for clip when supplied presetName (string).
+# Returns True if successful.
+
+CreateMagicMask(mode) ⟶ bool
+# Returns True if magic mask was created successfully, False otherwise.
+# mode can be "F" (forward), "B" (backward), or "BI" (bidirectional).
+
+RegenerateMagicMask() ⟶ bool
+# Returns True if magic mask was regenerated successfully, False otherwise.
+
+Stabilize() ⟶ bool
+# Returns True if stabilization was successful, False otherwise.
+
+SmartReframe() ⟶ bool
+# Performs Smart Reframe. Returns True if successful, False otherwise.
+
+GetNodeGraph(layerIdx=None) ⟶ Graph
+# Returns the clip's node graph object at layerIdx (int, optional).
+# Returns the first layer if layerIdx is skipped.
+# 1 <= layerIdx <= project.GetSetting("nodeStackLayers").
+
+GetColorGroup() ⟶ ColorGroup
+# Returns the clip's color group if one exists.
+
+AssignToColorGroup(ColorGroup) ⟶ bool
+# Returns True if TiItem is successfully assigned to the given ColorGroup.
+# ColorGroup must be an existing group in the current project.
+
+RemoveFromColorGroup() ⟶ bool
+# Returns True if the TiItem is successfully removed from the ColorGroup it is in.
+
+ExportLUT(exportType, path) ⟶ bool
+# Exports LUTs from tiItem referring to value passed in 'exportType' (enum) for LUT size.
+# Saves generated LUT in the provided 'path' (string). 'path' should include the intended file name.
+# If an empty or incorrect extension is provided, the appropriate extension (.cube/.vlt) will be appended at the end of the path.
+
+GetLinkedItems() ⟶ list
+# Returns a list of linked timeline items.
+
+GetTrackTypeAndIndex() ⟶ list
+# Returns a list of two values that correspond to the TimelineItem's trackType (string) and trackIndex (int) respectively.
+# trackType is one of {"audio", "video", "subtitle"}.
+# 1 <= trackIndex <= Timeline.GetTrackCount(trackType).
 ```
-
-```python
-SetClipColor(colorName: str) ⟶ bool
-# Sets a new color label for the MediaPoolItem.
-# Returns `True` if the color was successfully set, `False` otherwise.
-```
-
-```python
-Delete() ⟶ bool
-# Deletes the MediaPoolItem from the Media Pool.
-# Returns `True` if the item was successfully deleted, `False` otherwise.
-```
-
-```python
-Move(targetBin: MediaBin) ⟶ bool
-# Moves the MediaPoolItem to the specified MediaBin.
-# Returns `True` if the item was successfully moved, `False` otherwise.
-```
-
----
-
-## RenderJob Class
-
-### Methods
-
-```python
-GetJobId() ⟶ str
-# Returns the unique ID of the render job.
-```
-
-```python
-GetStatus() ⟶ str
-# Returns the current status of the render job (e.g., "Queued", "Rendering", "Completed").
-```
-
-```python
-GetProgress() ⟶ float
-# Returns the progress of the render job as a percentage.
-```
-
-```python
-Cancel() ⟶ bool
-# Cancels the render job.
-# Returns `True` if the job was successfully canceled, `False` otherwise.
-```
-
-```python
-Delete() ⟶ bool
-# Deletes the render job from the queue.
-# Returns `True` if the job was successfully deleted, `False` otherwise.
-```
-
-## Fusion Class
-
-### Methods
-
-```python
-LoadComp(path: str) ⟶ bool
-# Loads a Fusion composition from the specified file path.
-# Returns `True` if the composition was successfully loaded, `False` otherwise.
-```
-
-```python
-SaveComp(path: str) ⟶ bool
-# Saves the current Fusion composition to the specified file path.
-# Returns `True` if the composition was successfully saved, `False` otherwise.
-```
-
-```python
-GetCurrentComp() ⟶ FusionComp
-# Returns the currently active Fusion composition.
-```
-
-```python
-CreateComp() ⟶ FusionComp
-# Creates a new Fusion composition and returns the FusionComp object.
-```
-
-```python
-CloseComp(comp: FusionComp) ⟶ bool
-# Closes the specified Fusion composition.
-# Returns `True` if the composition was successfully closed, `False` otherwise.
-```
-
----
-
-## FusionComp Class
-
-### Methods
-
-```python
-AddTool(toolName: str, toolType: str, xPos: float, yPos: float) ⟶ Tool
-# Adds a new tool to the Fusion composition at the specified position.
-# - toolName is the name of the tool.
-# - toolType specifies the type of tool (e.g., "Loader", "Saver").
-# - xPos and yPos determine the position of the tool in the composition flow.
-# Returns the created Tool object.
-```
-
-```python
-GetToolList() ⟶ list
-# Returns a list of all tools in the Fusion composition.
-```
-
-```python
-DeleteTool(tool: Tool) ⟶ bool
-# Deletes the specified tool from the Fusion composition.
-# Returns `True` if the tool was successfully deleted, `False` otherwise.
-```
-
-```python
-GetFrameRange() ⟶ tuple
-# Returns the start and end frames of the Fusion composition as a tuple (startFrame, endFrame).
-```
-
-```python
-SetFrameRange(startFrame: int, endFrame: int) ⟶ bool
-# Sets the start and end frames of the Fusion composition.
-# Returns `True` if the frame range was successfully set, `False` otherwise.
-```
-
-```python
-Render(startFrame: int = None, endFrame: int = None) ⟶ bool
-# Renders the Fusion composition.
-# If startFrame and endFrame are provided, renders only that frame range.
-# Returns `True` if the composition was successfully rendered, `False` otherwise.
-```
-
-```python
-Save(path: str) ⟶ bool
-# Saves the Fusion composition to the specified file path.
-# Returns `True` if the composition was successfully saved, `False` otherwise.
-```
-
----
-
-## Tool Class
-
-### Methods
-
-```python
-GetAttrs() ⟶ dict
-# Returns a dictionary of attributes for the tool.
-```
-
-```python
-SetAttrs(attrs: dict) ⟶ bool
-# Sets the specified attributes for the tool using a dictionary.
-# Returns `True` if the attributes were successfully set, `False` otherwise.
-```
-
-```python
-GetInputList() ⟶ list
-# Returns a list of input connections for the tool.
-```
-
-```python
-ConnectInput(inputName: str, source: Tool) ⟶ bool
-# Connects the specified input to the output of another tool.
-# - inputName is the name of the input to connect.
-# - source is the tool to connect to the input.
-# Returns `True` if the input was successfully connected, `False` otherwise.
-```
-
-```python
-DisconnectInput(inputName: str) ⟶ bool
-# Disconnects the specified input.
-# Returns `True` if the input was successfully disconnected, `False` otherwise.
-```
-
-```python
-Delete() ⟶ bool
-# Deletes the tool from the Fusion composition.
-# Returns `True` if the tool was successfully deleted, `False` otherwise.
-```
-
-## MediaStorage Class
-
-### Methods
-
-```python
-GetMountedVolumeList() ⟶ list
-# Returns a list of mounted volumes (drives) available in the system.
-```
-
-```python
-GetFolderList(volumePath: str) ⟶ list
-# Returns a list of folders in the specified volume path.
-# - volumePath is the path to the volume whose folders you want to retrieve.
-```
-
-```python
-GetFileList(folderPath: str) ⟶ list
-# Returns a list of files in the specified folder path.
-# - folderPath is the path to the folder whose files you want to retrieve.
-```
-
-```python
-RevealInStorage(path: str) ⟶ bool
-# Reveals the specified file or folder in the Media Storage.
-# Returns `True` if the item was successfully revealed, `False` otherwise.
-```
-
-```python
-AddItemToMediaPool(filePath: str) ⟶ MediaPoolItem
-# Adds the specified file to the Media Pool.
-# - filePath is the path to the media file you want to add.
-# Returns the MediaPoolItem created.
-```
-
-```python
-AddItemsToMediaPool(filePaths: list) ⟶ list
-# Adds the specified list of files to the Media Pool.
-# - filePaths is a list of paths to media files you want to add.
-# Returns a list of MediaPoolItems created.
-```
-
-```python
-ImportMedia(filePath: str) ⟶ MediaPoolItem
-# Imports the specified media file into the Media Pool.
-# - filePath is the path to the media file you want to import.
-# Returns the MediaPoolItem created.
-```
-
----
-
 ## Gallery Class
 
 ### Methods
 
 ```python
-GetStill(index: int) ⟶ GalleryStill
-# Returns the GalleryStill object at the specified index in the gallery.
+GetAlbumName(galleryStillAlbum) ⟶ str
+# Returns the name of the GalleryStillAlbum object 'galleryStillAlbum'.
+
+SetAlbumName(galleryStillAlbum, albumName) ⟶ bool
+# Sets the name of the GalleryStillAlbum object 'galleryStillAlbum' to 'albumName'.
+
+GetCurrentStillAlbum() ⟶ GalleryStillAlbum
+# Returns the current album as a GalleryStillAlbum object.
+
+SetCurrentStillAlbum(galleryStillAlbum) ⟶ bool
+# Sets the current album to the GalleryStillAlbum object 'galleryStillAlbum'.
+
+GetGalleryStillAlbums() ⟶ list
+# Returns the gallery albums as a list of GalleryStillAlbum objects.
 ```
+
+## GalleryStillAlbum Class
+
+### Methods
 
 ```python
-GetStillCount() ⟶ int
-# Returns the number of stills in the gallery.
-```
+GetStills() ⟶ list
+# Returns the list of GalleryStill objects in the album.
 
-```python
-DeleteStill(galleryStill: GalleryStill) ⟶ bool
-# Deletes the specified GalleryStill from the gallery.
-# Returns `True` if the still was successfully deleted, `False` otherwise.
-```
+GetLabel(galleryStill) ⟶ str
+# Returns the label of the GalleryStill object 'galleryStill'.
 
-```python
-ExportStill(galleryStill: GalleryStill, filePath: str) ⟶ bool
-# Exports the specified GalleryStill to a file.
-# - filePath is the path to export the still to.
-# Returns `True` if the still was successfully exported, `False` otherwise.
-```
+SetLabel(galleryStill, label) ⟶ bool
+# Sets the new 'label' to the GalleryStill object 'galleryStill'.
 
-```python
-ImportStill(filePath: str) ⟶ GalleryStill
-# Imports a still image from the specified file path into the gallery.
-# Returns the imported GalleryStill object.
-```
+ImportStills(filePaths) ⟶ bool
+# Imports GalleryStill from each filePath in the filePaths list.
+# Returns True if at least one still is imported successfully, False otherwise.
 
----
+ExportStills(galleryStill, folderPath, filePrefix, format) ⟶ bool
+# Exports a list of GalleryStill objects 'galleryStill' to directory 'folderPath',
+# with filename prefix 'filePrefix', using file format 'format'.
+# Supported formats: dpx, cin, tif, jpg, png, ppm, bmp, xpm, drx.
+
+DeleteStills(galleryStill) ⟶ bool
+# Deletes the specified list of GalleryStill objects 'galleryStill'.
+```
 
 ## GalleryStill Class
 
-### Methods
+### Description
 
-```python
-GetName() ⟶ str
-# Returns the name of the GalleryStill.
-```
+This class does not provide any API functions but the object type is used by functions in other classes.
 
-```python
-SetName(stillName: str) ⟶ bool
-# Sets a new name for the GalleryStill.
-# Returns `True` if the name was successfully set, `False` otherwise.
-```
-
-```python
-Delete() ⟶ bool
-# Deletes the GalleryStill from the gallery.
-# Returns `True` if the still was successfully deleted, `False` otherwise.
-```
-
-```python
-Export(filePath: str) ⟶ bool
-# Exports the GalleryStill to the specified file path.
-# Returns `True` if the still was successfully exported, `False` otherwise.
-```
-
-## Marker Class
+## Graph Class
 
 ### Methods
 
 ```python
-GetColor() ⟶ str
-# Returns the color of the marker.
+GetNumNodes() ⟶ int
+# Returns the number of nodes in the graph.
+
+SetLUT(nodeIndex, lutPath) ⟶ bool
+# Sets a LUT on the node mapping the node index provided.
+# 1 <= nodeIndex <= self.GetNumNodes().
+# The lutPath can be an absolute path or a relative path (based off custom LUT paths or the master LUT path).
+# The operation is successful for valid LUT paths that Resolve has already discovered (see Project.RefreshLUTList).
+
+GetLUT(nodeIndex) ⟶ str
+# Gets the relative LUT path based on the node index provided.
+# 1 <= nodeIndex <= total number of nodes.
+
+GetNodeLabel(nodeIndex) ⟶ str
+# Returns the label of the node at nodeIndex.
+
+GetToolsInNode(nodeIndex) ⟶ list
+# Returns toolsList (list of strings) of the tools used in the node indicated by the given nodeIndex (int).
+
+SetNodeEnabled(nodeIndex, isEnabled) ⟶ bool
+# Sets the node at the given nodeIndex (int) to isEnabled (bool).
+# 1 <= nodeIndex <= self.GetNumNodes().
 ```
 
-```python
-SetColor(color: str) ⟶ bool
-# Sets a new color for the marker.
-# Returns `True` if the color was successfully set, `False` otherwise.
-```
-
-```python
-GetName() ⟶ str
-# Returns the name of the marker.
-```
-
-```python
-SetName(markerName: str) ⟶ bool
-# Sets a new name for the marker.
-# Returns `True` if the name was successfully set, `False` otherwise.
-```
-
-```python
-GetNote() ⟶ str
-# Returns the note associated with the marker.
-```
-
-```python
-SetNote(note: str) ⟶ bool
-# Sets a new note for the marker.
-# Returns `True` if the note was successfully set, `False` otherwise.
-```
-
-```python
-GetDuration() ⟶ int
-# Returns the duration of the marker in frames.
-```
-
-```python
-SetDuration(duration: int) ⟶ bool
-# Sets a new duration for the marker in frames.
-# Returns `True` if the duration was successfully set, `False` otherwise.
-```
-
-```python
-GetStart() ⟶ int
-# Returns the start frame of the marker.
-```
-
-```python
-SetStart(startFrame: int) ⟶ bool
-# Sets a new start frame for the marker.
-# Returns `True` if the start frame was successfully set, `False` otherwise.
-```
-
----
-
-## FusionOperator Class
+## ColorGroup Class
 
 ### Methods
 
 ```python
 GetName() ⟶ str
-# Returns the name of the FusionOperator.
-```
-
-```python
-SetName(operatorName: str) ⟶ bool
-# Sets a new name for the FusionOperator.
-# Returns `True` if the name was successfully set, `False` otherwise.
-```
-
-```python
-GetInputList() ⟶ list
-# Returns a list of input connections for the FusionOperator.
-```
-
-```python
-ConnectInput(inputName: str, source: FusionOperator) ⟶ bool
-# Connects the specified input to the output of another FusionOperator.
-# - inputName is the name of the input to connect.
-# - source is the FusionOperator to connect to the input.
-# Returns `True` if the input was successfully connected, `False` otherwise.
-```
-
-```python
-DisconnectInput(inputName: str) ⟶ bool
-# Disconnects the specified input.
-# Returns `True` if the input was successfully disconnected, `False` otherwise.
-```
-
-```python
-Delete() ⟶ bool
-# Deletes the FusionOperator from the Fusion composition.
-# Returns `True` if the FusionOperator was successfully deleted, `False` otherwise.
-```
-
----
-
-## Clip Class
-
-### Methods
-
-```python
-GetName() ⟶ str
-# Returns the name of the clip.
-```
-
-```python
-SetName(clipName: str) ⟶ bool
-# Sets a new name for the clip.
-# Returns `True` if the name was successfully set, `False` otherwise.
-```
-
-```python
-GetDuration() ⟶ int
-# Returns the duration of the clip in frames.
-```
-
-```python
-SetDuration(duration: int) ⟶ bool
-# Sets a new duration for the clip in frames.
-# Returns `True` if the duration was successfully set, `False` otherwise.
-```
-
-```python
-GetStart() ⟶ int
-# Returns the start frame of the clip.
-```
-
-```python
-SetStart(startFrame: int) ⟶ bool
-# Sets a new start frame for the clip.
-# Returns `True` if the start frame was successfully set, `False` otherwise.
-```
-
-```python
-GetEnd() ⟶ int
-# Returns the end frame of the clip.
-```
-
-```python
-SetEnd(endFrame: int) ⟶ bool
-# Sets a new end frame for the clip.
-# Returns `True` if the end frame was successfully set, `False` otherwise.
-```
-
-```python
-GetFrameRate() ⟶ float
-# Returns the frame rate of the clip.
-```
-
-```python
-SetFrameRate(frameRate: float) ⟶ bool
-# Sets a new frame rate for the clip.
-# Returns `True` if the frame rate was successfully set, `False` otherwise.
-```
-
-```python
-GetColor() ⟶ str
-# Returns the color label of the clip.
-```
-
-```python
-SetColor(colorName: str) ⟶ bool
-# Sets a new color label for the clip.
-# Returns `True` if the color was successfully set, `False` otherwise.
-```
-
-## MarkerList Class
-
-### Methods
-
-```python
-GetCount() ⟶ int
-# Returns the number of markers in the MarkerList.
-```
-
-```python
-GetMarkerByIndex(index: int) ⟶ Marker
-# Returns the Marker object at the specified index in the MarkerList.
-```
-
-```python
-GetMarkerByColor(color: str) ⟶ list
-# Returns a list of Marker objects that have the specified color.
-```
-
-```python
-GetMarkerByName(markerName: str) ⟶ Marker
-# Returns the Marker object that matches the specified name.
-```
-
-```python
-AddMarker(frameId: int, color: str, name: str, note: str, duration: int) ⟶ Marker
-# Adds a new Marker to the MarkerList at the specified frame.
-# - frameId is the start frame of the marker.
-# - color is the color of the marker.
-# - name is the name of the marker.
-# - note is the note associated with the marker.
-# - duration is the duration of the marker in frames.
-# Returns the created Marker object.
-```
-
-```python
-DeleteMarkerByIndex(index: int) ⟶ bool
-# Deletes the Marker at the specified index in the MarkerList.
-# Returns `True` if the marker was successfully deleted, `False` otherwise.
-```
-
-```python
-DeleteMarkerByColor(color: str) ⟶ int
-# Deletes all Markers that have the specified color.
-# Returns the number of markers that were successfully deleted.
-```
-
-```python
-DeleteMarkerByName(markerName: str) ⟶ bool
-# Deletes the Marker that matches the specified name.
-# Returns `True` if the marker was successfully deleted, `False` otherwise.
-```
-
----
-
-## Track Class
-
-### Methods
-
-```python
-GetTrackType() ⟶ str
-# Returns the type of the track (e.g., "video", "audio", "subtitle").
-```
-
-```python
-GetTrackIndex() ⟶ int
-# Returns the index of the track in the timeline.
-```
-
-```python
-GetItemCount() ⟶ int
-# Returns the number of items in the track.
-```
-
-```python
-GetItemByIndex(index: int) ⟶ TimelineItem
-# Returns the TimelineItem at the specified index within the track.
-```
-
-```python
-InsertItem(item: MediaPoolItem, index: int) ⟶ bool
-# Inserts a MediaPoolItem into the track at the specified index.
-# Returns `True` if the item was successfully inserted, `False` otherwise.
-```
-
-```python
-DeleteItem(index: int) ⟶ bool
-# Deletes the TimelineItem at the specified index within the track.
-# Returns `True` if the item was successfully deleted, `False` otherwise.
-```
-
-```python
-MoveItem(item: TimelineItem, newIndex: int) ⟶ bool
-# Moves the specified TimelineItem to a new index within the track.
-# Returns `True` if the item was successfully moved, `False` otherwise.
-```
-
-```python
-GetMarkerList() ⟶ MarkerList
-# Returns the MarkerList associated with the track.
-```
-
-## Timeline Class
-
-### Methods
-
-```python
-GetTrackCount(trackType: str) ⟶ int
-# Returns the number of tracks of the specified type in the timeline.
-# - trackType can be "video", "audio", or "subtitle".
-```
-
-```python
-GetTrackByIndex(trackType: str, trackIndex: int) ⟶ Track
-# Returns the Track object at the specified index of the given type.
-# - trackType can be "video", "audio", or "subtitle".
-```
-
-```python
-InsertTrack(trackType: str, trackIndex: int) ⟶ bool
-# Inserts a new track of the specified type at the given index.
-# - trackType can be "video", "audio", or "subtitle".
-# Returns `True` if the track was successfully inserted, `False` otherwise.
-```
-
-```python
-DeleteTrack(trackType: str, trackIndex: int) ⟶ bool
-# Deletes the track of the specified type at the given index.
-# - trackType can be "video", "audio", or "subtitle".
-# Returns `True` if the track was successfully deleted, `False` otherwise.
-```
-
-```python
-MoveTrack(trackType: str, sourceIndex: int, destinationIndex: int) ⟶ bool
-# Moves the track of the specified type from the source index to the destination index.
-# - trackType can be "video", "audio", or "subtitle".
-# Returns `True` if the track was successfully moved, `False` otherwise.
-```
-
-```python
-GetCurrentTimelineItem() ⟶ TimelineItem
-# Returns the currently selected TimelineItem in the timeline.
-```
-
-```python
-GetItemListInTrack(trackType: str, trackIndex: int) ⟶ list
-# Returns a list of TimelineItems in the specified track.
-# - trackType can be "video", "audio", or "subtitle".
-```
-
-```python
-AppendItem(item: MediaPoolItem) ⟶ bool
-# Appends a MediaPoolItem to the end of the timeline.
-# Returns `True` if the item was successfully appended, `False` otherwise.
-```
-
-```python
-InsertItem(item: MediaPoolItem, trackType: str, trackIndex: int, frameId: int) ⟶ bool
-# Inserts a MediaPoolItem into the specified track at the given frame.
-# - trackType can be "video", "audio", or "subtitle".
-# Returns `True` if the item was successfully inserted, `False` otherwise.
-```
-
-```python
-DeleteItem(trackType: str, trackIndex: int, itemIndex: int) ⟶ bool
-# Deletes the TimelineItem at the specified index in the given track.
-# - trackType can be "video", "audio", or "subtitle".
-# Returns `True` if the item was successfully deleted, `False` otherwise.
-```
-
-```python
-MoveItem(trackType: str, sourceIndex: int, destinationIndex: int) ⟶ bool
-# Moves the TimelineItem from the source index to the destination index within the specified track.
-# - trackType can be "video", "audio", or "subtitle".
-# Returns `True` if the item was successfully moved, `False` otherwise.
-```
-
-```python
-GetMarkerList() ⟶ MarkerList
-# Returns the MarkerList associated with the timeline.
-```
-
-```python
-AddMarker(frameId: int, color: str, name: str, note: str, duration: int) ⟶ Marker
-# Adds a new Marker to the timeline at the specified frame.
-# - frameId is the start frame of the marker.
-# - color is the color of the marker.
-# - name is the name of the marker.
-# - note is the note associated with the marker.
-# - duration is the duration of the marker in frames.
-# Returns the created Marker object.
-```
-
-```python
-DeleteMarkerByIndex(index: int) ⟶ bool
-# Deletes the Marker at the specified index in the timeline.
-# Returns `True` if the marker was successfully deleted, `False` otherwise.
-```
-
-```python
-DeleteMarkerByColor(color: str) ⟶ int
-# Deletes all Markers that have the specified color in the timeline.
-# Returns the number of markers that were successfully deleted.
-```
-
-```python
-DeleteMarkerByName(markerName: str) ⟶ bool
-# Deletes the Marker that matches the specified name in the timeline.
-# Returns `True` if the marker was successfully deleted, `False` otherwise.
-```
-
-```python
-GetCurrentFrame() ⟶ int
-# Returns the current frame in the timeline.
-```
-
-```python
-SetCurrentFrame(frameId: int) ⟶ bool
-# Sets the current frame in the timeline.
-# Returns `True` if the frame was successfully set, `False` otherwise.
-```
-
-## MediaClip Class
-
-### Methods
-
-```python
-GetClipColor() ⟶ str
-# Returns the color label of the MediaClip.
-```
-
-```python
-SetClipColor(colorName: str) ⟶ bool
-# Sets a new color label for the MediaClip.
-# Returns `True` if the color was successfully set, `False` otherwise.
-```
-
-```python
-GetMediaPath() ⟶ str
-# Returns the file path of the media associated with the MediaClip.
-```
-
-```python
-GetDuration() ⟶ int
-# Returns the duration of the MediaClip in frames.
-```
-
-```python
-GetStart() ⟶ int
-# Returns the start frame of the MediaClip.
-```
-
-```python
-SetStart(startFrame: int) ⟶ bool
-# Sets a new start frame for the MediaClip.
-# Returns `True` if the start frame was successfully set, `False` otherwise.
-```
-
-```python
-GetEnd() ⟶ int
-# Returns the end frame of the MediaClip.
-```
-
-```python
-SetEnd(endFrame: int) ⟶ bool
-# Sets a new end frame for the MediaClip.
-# Returns `True` if the end frame was successfully set, `False` otherwise.
-```
-
-```python
-GetFrameRate() ⟶ float
-# Returns the frame rate of the MediaClip.
-```
-
-```python
-SetFrameRate(frameRate: float) ⟶ bool
-# Sets a new frame rate for the MediaClip.
-# Returns `True` if the frame rate was successfully set, `False` otherwise.
-```
-
----
-
-## MediaPoolClip Class
+# Returns the name (string) of the ColorGroup.
 
-### Methods
+SetName(groupName) ⟶ bool
+# Renames the ColorGroup to groupName (string).
 
-```python
-GetClipColor() ⟶ str
-# Returns the color label of the MediaPoolClip.
-```
-
-```python
-SetClipColor(colorName: str) ⟶ bool
-# Sets a new color label for the MediaPoolClip.
-# Returns `True` if the color was successfully set, `False` otherwise.
-```
-
-```python
-GetMediaPath() ⟶ str
-# Returns the file path of the media associated with the MediaPoolClip.
-```
-
-```python
-GetDuration() ⟶ int
-# Returns the duration of the MediaPoolClip in frames.
-```
-
-```python
-GetStart() ⟶ int
-# Returns the start frame of the MediaPoolClip.
-```
-
-```python
-SetStart(startFrame: int) ⟶ bool
-# Sets a new start frame for the MediaPoolClip.
-# Returns `True` if the start frame was successfully set, `False` otherwise.
-```
-
-```python
-GetEnd() ⟶ int
-# Returns the end frame of the MediaPoolClip.
-```
-
-```python
-SetEnd(endFrame: int) ⟶ bool
-# Sets a new end frame for the MediaPoolClip.
-# Returns `True` if the end frame was successfully set, `False` otherwise.
-```
-
-```python
-GetFrameRate() ⟶ float
-# Returns the frame rate of the MediaPoolClip.
-```
-
-```python
-SetFrameRate(frameRate: float) ⟶ bool
-# Sets a new frame rate for the MediaPoolClip.
-# Returns `True` if the frame rate was successfully set, `False` otherwise.
-```
-
----
-
-## RenderSettings Class
-
-### Methods
-
-```python
-GetFormat() ⟶ str
-# Returns the current render format (e.g., "mp4", "mov").
-```
-
-```python
-SetFormat(format: str) ⟶ bool
-# Sets the render format.
-# Returns `True` if the format was successfully set, `False` otherwise.
-```
-
-```python
-GetCodec() ⟶ str
-# Returns the current render codec (e.g., "H.264", "ProRes").
-```
-
-```python
-SetCodec(codec: str) ⟶ bool
-# Sets the render codec.
-# Returns `True` if the codec was successfully set, `False` otherwise.
-```
-
-```python
-GetResolution() ⟶ tuple
-# Returns the current render resolution as a tuple (width, height).
-```
-
-```python
-SetResolution(width: int, height: int) ⟶ bool
-# Sets the render resolution.
-# Returns `True` if the resolution was successfully set, `False` otherwise.
-```
-
-```python
-GetFrameRate() ⟶ float
-# Returns the current render frame rate.
-```
-
-```python
-SetFrameRate(frameRate: float) ⟶ bool
-# Sets the render frame rate.
-# Returns `True` if the frame rate was successfully set, `False` otherwise.
-```
-
-## Deliverable Class
-
-### Methods
-
-```python
-GetName() ⟶ str
-# Returns the name of the deliverable.
-```
-
-```python
-SetName(deliverableName: str) ⟶ bool
-# Sets a new name for the deliverable.
-# Returns `True` if the name was successfully set, `False` otherwise.
-```
-
-```python
-GetRenderSettings() ⟶ RenderSettings
-# Returns the RenderSettings object associated with the deliverable.
-```
-
-```python
-SetRenderSettings(settings: RenderSettings) ⟶ bool
-# Applies the specified RenderSettings to the deliverable.
-# Returns `True` if the settings were successfully applied, `False` otherwise.
-```
-
-```python
-GetRenderQueue() ⟶ list
-# Returns the list of render jobs in the deliverable's render queue.
-```
-
-```python
-AddRenderJob(job: dict) ⟶ str
-# Adds a new render job to the deliverable's render queue.
-# Returns the ID of the newly created job.
-```
-
-```python
-DeleteRenderJob(jobId: str) ⟶ bool
-# Deletes the render job with the specified ID from the deliverable's render queue.
-# Returns `True` if the job was successfully deleted, `False` otherwise.
-```
-
-```python
-StartRendering(jobIds: list = None, isInteractiveMode: bool = False) ⟶ bool
-# Starts rendering the specified jobs in the deliverable's render queue.
-# If no job IDs are provided, all jobs will be rendered.
-# If isInteractiveMode is set to True, error feedback is enabled in the UI during rendering.
-# Returns `True` if the rendering was successfully started, `False` otherwise.
-```
-
-```python
-StopRendering() ⟶ bool
-# Stops any current rendering processes in the deliverable's render queue.
-# Returns `True` if the rendering was successfully stopped, `False` otherwise.
-```
-
-```python
-IsRenderingInProgress() ⟶ bool
-# Returns `True` if rendering is currently in progress for any jobs in the deliverable's render queue, `False` otherwise.
-```
-
----
-
-## ResolveUser Class
-
-### Methods
-
-```python
-GetName() ⟶ str
-# Returns the name of the ResolveUser.
-```
-
-```python
-SetName(userName: str) ⟶ bool
-# Sets a new name for the ResolveUser.
-# Returns `True` if the name was successfully set, `False` otherwise.
-```
-
-```python
-GetEmail() ⟶ str
-# Returns the email address of the ResolveUser.
-```
+GetClipsInTimeline(Timeline=CurrTimeline) ⟶ list
+# Returns a list of TimelineItem that are in the ColorGroup in the given Timeline.
+# Timeline defaults to the Current Timeline if not specified.
 
-```python
-SetEmail(email: str) ⟶ bool
-# Sets a new email address for the ResolveUser.
-# Returns `True` if the email was successfully set, `False` otherwise.
-```
-
-```python
-GetPhoneNumber() ⟶ str
-# Returns the phone number of the ResolveUser.
-```
-
-```python
-SetPhoneNumber(phoneNumber: str) ⟶ bool
-# Sets a new phone number for the ResolveUser.
-# Returns `True` if the phone number was successfully set, `False` otherwise.
-```
-
-```python
-GetRole() ⟶ str
-# Returns the role of the ResolveUser (e.g., "Administrator", "Editor").
-```
-
-```python
-SetRole(role: str) ⟶ bool
-# Sets a new role for the ResolveUser.
-# Returns `True` if the role was successfully set, `False` otherwise.
-```
-
-## ExportSettings Class
-
-### Methods
-
-```python
-GetFileName() ⟶ str
-# Returns the name of the file to be exported.
-```
-
-```python
-SetFileName(fileName: str) ⟶ bool
-# Sets the name of the file to be exported.
-# Returns `True` if the name was successfully set, `False` otherwise.
-```
-
-```python
-GetFilePath() ⟶ str
-# Returns the path of the file to be exported.
-```
-
-```python
-SetFilePath(filePath: str) ⟶ bool
-# Sets the path of the file to be exported.
-# Returns `True` if the path was successfully set, `False` otherwise.
-```
-
-```python
-GetCodec() ⟶ str
-# Returns the codec to be used for the export (e.g., "H.264", "ProRes").
-```
-
-```python
-SetCodec(codec: str) ⟶ bool
-# Sets the codec to be used for the export.
-# Returns `True` if the codec was successfully set, `False` otherwise.
-```
-
-```python
-GetResolution() ⟶ tuple
-# Returns the resolution for the export as a tuple (width, height).
-```
-
-```python
-SetResolution(width: int, height: int) ⟶ bool
-# Sets the resolution for the export.
-# Returns `True` if the resolution was successfully set, `False` otherwise.
-```
-
-```python
-GetFrameRate() ⟶ float
-# Returns the frame rate for the export.
-```
-
-```python
-SetFrameRate(frameRate: float) ⟶ bool
-# Sets the frame rate for the export.
-# Returns `True` if the frame rate was successfully set, `False` otherwise.
-```
-
-```python
-GetBitRate() ⟶ int
-# Returns the bit rate for the export in kbps.
-```
-
-```python
-SetBitRate(bitRate: int) ⟶ bool
-# Sets the bit rate for the export in kbps.
-# Returns `True` if the bit rate was successfully set, `False` otherwise.
-```
-
-```python
-GetAudioSettings() ⟶ dict
-# Returns a dictionary of audio settings for the export (e.g., codec, channels).
-```
-
-```python
-SetAudioSettings(audioSettings: dict) ⟶ bool
-# Sets the audio settings for the export using a dictionary.
-# Returns `True` if the audio settings were successfully set, `False` otherwise.
-```
-
-```python
-GetContainer() ⟶ str
-# Returns the container format for the export (e.g., "mp4", "mov").
-```
-
-```python
-SetContainer(container: str) ⟶ bool
-# Sets the container format for the export.
-# Returns `True` if the container was successfully set, `False` otherwise.
-```
-
----
-
-## ResolveApp Class
-
-### Methods
-
-```python
-GetVersion() ⟶ str
-# Returns the version of DaVinci Resolve.
-```
-
-```python
-GetUser() ⟶ ResolveUser
-# Returns the currently logged-in ResolveUser.
-```
-
-```python
-OpenProject(projectName: str) ⟶ Project
-# Opens the project with the specified name.
-# Returns the Project object if successful.
-```
-
-```python
-CreateProject(projectName: str) ⟶ Project
-# Creates a new project with the specified name.
-# Returns the Project object if successful.
-```
-
-```python
-DeleteProject(projectName: str) ⟶ bool
-# Deletes the project with the specified name.
-# Returns `True` if the project was successfully deleted, `False` otherwise.
-```
-
-```python
-GetProjectManager() ⟶ ProjectManager
-# Returns the ProjectManager object, which provides access to project-related functions.
-```
-
-```python
-GetCurrentProject() ⟶ Project
-# Returns the currently active Project object.
-```
+GetPreClipNodeGraph() ⟶ Graph
+# Returns the ColorGroup Pre-clip graph.
 
-```python
-GetMediaStorage() ⟶ MediaStorage
-# Returns the MediaStorage object, which provides access to the media storage functions.
+GetPostClipNodeGraph() ⟶ Graph
+# Returns the ColorGroup Post-clip graph.
 ```
 
-```python
-GetFusion() ⟶ Fusion
-# Returns the Fusion object, which provides access to Fusion-related functions.
-```
-
-```python
-GetRenderQueue() ⟶ list
-# Returns the list of render jobs in the current session.
-```
-
-```python
-StartRendering(jobIds: list = None, isInteractiveMode: bool = False) ⟶ bool
-# Starts rendering the specified jobs in the render queue.
-# If no job IDs are provided, all jobs will be rendered.
-# If isInteractiveMode is set to True, error feedback is enabled in the UI during rendering.
-# Returns `True` if rendering was successfully started, `False` otherwise.
-```
-
-```python
-StopRendering() ⟶ bool
-# Stops any current rendering processes.
-# Returns `True` if rendering was successfully stopped, `False` otherwise.
-```
-
-```python
-IsRenderingInProgress() ⟶ bool
-# Returns `True` if rendering is currently in progress for any jobs in the render queue, `False` otherwise.
-```
