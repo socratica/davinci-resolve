@@ -1133,3 +1133,559 @@ GetPostClipNodeGraph() ⟶ Graph
 # Returns the ColorGroup Post-clip graph.
 ```
 
+## Keyframe Mode Information
+
+This section covers additional notes for the functions `Resolve.GetKeyframeMode()` and `Resolve.SetKeyframeMode(keyframeMode)`.
+
+### `keyframeMode` Enums
+
+`keyframeMode` can be one of the following enums:
+
+- `resolve.KEYFRAME_MODE_ALL` ⟶ 0
+- `resolve.KEYFRAME_MODE_COLOR` ⟶ 1
+- `resolve.KEYFRAME_MODE_SIZING` ⟶ 2
+
+**Description:**
+
+- Integer values returned by `Resolve.GetKeyframeMode()` will correspond to the enums above.
+
+## Cloud Projects Settings
+
+This section covers additional notes for the functions `ProjectManager:CreateCloudProject`, `ProjectManager:ImportCloudProject`, and `ProjectManager:RestoreCloudProject`.
+
+### `cloudSettings` Dict
+
+All three functions take in a `{cloudSettings}` dictionary, which includes the following keys:
+
+- `resolve.CLOUD_SETTING_PROJECT_NAME`: `str`, `["" by default]`
+- `resolve.CLOUD_SETTING_PROJECT_MEDIA_PATH`: `str`, `["" by default]`
+- `resolve.CLOUD_SETTING_IS_COLLAB`: `bool`, `[False by default]`
+- `resolve.CLOUD_SETTING_SYNC_MODE`: `syncMode` (see below), `[resolve.CLOUD_SYNC_PROXY_ONLY by default]`
+- `resolve.CLOUD_SETTING_IS_CAMERA_ACCESS`: `bool`, `[False by default]`
+
+### `syncMode` Values
+
+`syncMode` can be one of the following values:
+
+- `resolve.CLOUD_SYNC_NONE`
+- `resolve.CLOUD_SYNC_PROXY_ONLY`
+- `resolve.CLOUD_SYNC_PROXY_AND_ORIG`
+
+### Requirements
+
+- All three functions (`ProjectManager:CreateCloudProject`, `ProjectManager:ImportCloudProject`, and `ProjectManager:RestoreCloudProject`) require `resolve.CLOUD_SETTING_PROJECT_MEDIA_PATH` to be defined.
+- `ProjectManager:CreateCloudProject` also requires `resolve.CLOUD_SETTING_PROJECT_NAME` to be defined.
+
+## Looking up Project and Clip Properties
+
+This section covers additional notes for the functions `Project:GetSetting`, `Project:SetSetting`, `Timeline:GetSetting`, `Timeline:SetSetting`, `MediaPoolItem:GetClipProperty`, and `MediaPoolItem:SetClipProperty`. These functions are used to get and set properties that are otherwise available to the user through the Project Settings and the Clip Attributes dialogs.
+
+### Key-Value Pair Format
+
+The functions follow a key-value pair format, where each property is identified by a key (the `settingName` or `propertyName` parameter) and possesses a value (typically a text value). Keys and values are designed to be easily correlated with parameter names and values in the Resolve UI. Explicitly enumerated values for some parameters are listed below.
+
+Some properties may be read-only—these include intrinsic clip properties like the date created or sample rate, and properties that can be disabled in specific application contexts (e.g., custom colorspaces in an ACES workflow, or output sizing parameters when behavior is set to match the timeline).
+
+### Getting Values
+
+Invoke `Project:GetSetting`, `Timeline:GetSetting`, or `MediaPoolItem:GetClipProperty` with the appropriate property key. To get a snapshot of all queryable properties (keys and values), you can call `Project:GetSetting`, `Timeline:GetSetting`, or `MediaPoolItem:GetClipProperty` without parameters (or with a `NoneType` or a blank property key). Using specific keys to query individual properties will be faster. Note that getting a property using an invalid key will return a trivial result.
+
+### Setting Values
+
+Invoke `Project:SetSetting`, `Timeline:SetSetting`, or `MediaPoolItem:SetClipProperty` with the appropriate property key and a valid value. When setting a parameter, please check the return value to ensure the success of the operation. You can troubleshoot the validity of keys and values by setting the desired result from the UI and checking property snapshots before and after the change.
+
+### Enumerated Project Properties
+
+#### `superScale`
+- The property value is an enumerated integer between `0` and `4` with these meanings:
+  - `0 = Auto`
+  - `1 = No scaling`
+  - `2`, `3`, and `4` represent the Super Scale multipliers `2x`, `3x`, and `4x`.
+- For the super scale multiplier `2x Enhanced`, exactly four arguments must be passed as outlined below. If fewer than four arguments are passed, it will default to `2x`.
+
+**Affects:**
+- `x = Project:GetSetting('superScale')` and `Project:SetSetting('superScale', x)`
+- For `2x Enhanced`: `Project:SetSetting('superScale', 2, sharpnessValue, noiseReductionValue)`, where `sharpnessValue` is a float in the range `[0.0, 1.0]` and `noiseReductionValue` is a float in the range `[0.0, 1.0]`.
+
+#### `timelineFrameRate`
+- The property value is one of the frame rates available to the user in project settings under the "Timeline frame rate" option.
+- Drop Frame can be configured for supported frame rates by appending the frame rate with `"DF"`, e.g., `"29.97 DF"` will enable drop frame and `"29.97"` will disable drop frame.
+
+**Affects:**
+- `x = Project:GetSetting('timelineFrameRate')` and `Project:SetSetting('timelineFrameRate', x)`
+
+### Enumerated Clip Properties
+
+#### `Super Scale`
+- The property value is an enumerated integer between `1` and `4` with these meanings:
+  - `1 = No scaling`
+  - `2`, `3`, and `4` represent the Super Scale multipliers `2x`, `3x`, and `4x`.
+- For the super scale multiplier `2x Enhanced`, exactly four arguments must be passed as outlined below. If fewer than four arguments are passed, it will default to `2x`.
+
+**Affects:**
+- `x = MediaPoolItem:GetClipProperty('Super Scale')` and `MediaPoolItem:SetClipProperty('Super Scale', x)`
+- For `2x Enhanced`: `MediaPoolItem:SetClipProperty('Super Scale', 2, sharpnessValue, noiseReductionValue)`, where `sharpnessValue` is a float in the range `[0.0, 1.0]` and `noiseReductionValue` is a float in the range `[0.0, 1.0]`.
+
+#### `Cloud Sync`
+- The property value is an enumerated integer that corresponds to one of the following enums:
+  - `resolve.CLOUD_SYNC_DEFAULT` ⟶ `-1`
+  - `resolve.CLOUD_SYNC_DOWNLOAD_IN_QUEUE` ⟶ `0`
+  - `resolve.CLOUD_SYNC_DOWNLOAD_IN_PROGRESS` ⟶ `1`
+  - `resolve.CLOUD_SYNC_DOWNLOAD_SUCCESS` ⟶ `2`
+  - `resolve.CLOUD_SYNC_DOWNLOAD_FAIL` ⟶ `3`
+  - `resolve.CLOUD_SYNC_DOWNLOAD_NOT_FOUND` ⟶ `4`
+  - `resolve.CLOUD_SYNC_UPLOAD_IN_QUEUE` ⟶ `5`
+  - `resolve.CLOUD_SYNC_UPLOAD_IN_PROGRESS` ⟶ `6`
+  - `resolve.CLOUD_SYNC_UPLOAD_SUCCESS` ⟶ `7`
+  - `resolve.CLOUD_SYNC_UPLOAD_FAIL` ⟶ `8`
+  - `resolve.CLOUD_SYNC_UPLOAD_NOT_FOUND` ⟶ `9`
+
+## Audio Mapping
+
+This section covers the output for `mpItem.GetAudioMapping()`.
+
+### Example Scenario
+
+This example assumes an `mpItem` that has audio from its embedded source and from two other clips that are linked to it. The audio clip attributes of this `mpItem` will show 3 tracks.
+
+Assume that:
+
+- **(A)** The embedded track is of format/type 'stereo' (2 channels).
+- **(B)** Linked clip 1 track is of format/type '7.1' (8 channels).
+- **(C)** Linked clip 2 track is '5.1' (6 channels).
+
+Assume that the format/type was not changed further.
+
+### Output
+
+`mpItem.GetAudioMapping()` returns a string of the form:
+
+```python
+{
+  "embedded_audio_channels": 2,                 # Total number of embedded channels across all tracks
+  "linked_audio": {                             # A list of only linked audio information
+    "1": {                                      # Same as (B) above
+      "channels": 8,
+      "path": FILE_PATH
+    },
+    "2": {                                      # Same as (C) above
+      "channels": 6,
+      "path": FILE_PATH
+    }
+  },
+  "track_mapping": {                            # Listing of all the tracks. Output here will match what is seen in the audio clip attributes menu on the UI.
+    "1": {
+      "channel_idx": [0, 3],                    # Channel index '0' indicates that the channel is muted; in this case, channel index '3' will correspond to the first channel of (B)
+      "type": "Stereo"                          # The length of the 'channel_idx' list will always correspond to the number of channels the format specified in 'type' will allow.
+                                                # In this case, 'Stereo' allows 2 channels and so the length of the 'channel_idx' list is 2.
+    },
+    "2": {
+      "channel_idx": [3, 4, 5, 6, 7, 8, 9, 10], # Channel indices here are following the default for (B)
+      "type": "7.1"
+    },
+    "3": {
+      "channel_idx": [0, 0, 0, 1, 15, 16],      # The first three channels for this track are muted; The next channel is the first channel of (A), and the final 2 follow the default for (C)
+      "type": "5.1"
+    }
+  }
+}
+```
+
+
+## Auto Caption Settings
+
+This section covers the supported settings for the method `Timeline.CreateSubtitlesFromAudio({autoCaptionSettings})`.
+
+### `autoCaptionSettings` Dictionary
+
+The parameter setting is a dictionary containing the following keys:
+
+- `resolve.SUBTITLE_LANGUAGE`: `languageID` (see below), `[resolve.AUTO_CAPTION_AUTO by default]`
+- `resolve.SUBTITLE_CAPTION_PRESET`: `presetType` (see below), `[resolve.AUTO_CAPTION_SUBTITLE_DEFAULT by default]`
+- `resolve.SUBTITLE_CHARS_PER_LINE`: `int`, Number between `1` and `60` inclusive `[42 by default]`
+- `resolve.SUBTITLE_LINE_BREAK`: `lineBreakType` (see below), `[resolve.AUTO_CAPTION_LINE_SINGLE by default]`
+- `resolve.SUBTITLE_GAP`: `int`, Number between `0` and `10` inclusive `[0 by default]`
+
+**Note:** The default values for some keys may change based on values defined for other keys, as per the UI.
+
+**Example:**
+If the following dictionary is supplied:
+
+```python
+CreateSubtitlesFromAudio({
+    resolve.SUBTITLE_LANGUAGE = resolve.AUTO_CAPTION_KOREAN,
+    resolve.SUBTITLE_CAPTION_PRESET = resolve.AUTO_CAPTION_NETFLIX
+})
+```
+
+The default value for `resolve.SUBTITLE_CHARS_PER_LINE` will be `16` instead of `42`.
+
+### `languageID` Values
+
+- `resolve.AUTO_CAPTION_AUTO`
+- `resolve.AUTO_CAPTION_DANISH`
+- `resolve.AUTO_CAPTION_DUTCH`
+- `resolve.AUTO_CAPTION_ENGLISH`
+- `resolve.AUTO_CAPTION_FRENCH`
+- `resolve.AUTO_CAPTION_GERMAN`
+- `resolve.AUTO_CAPTION_ITALIAN`
+- `resolve.AUTO_CAPTION_JAPANESE`
+- `resolve.AUTO_CAPTION_KOREAN`
+- `resolve.AUTO_CAPTION_MANDARIN_SIMPLIFIED`
+- `resolve.AUTO_CAPTION_MANDARIN_TRADITIONAL`
+- `resolve.AUTO_CAPTION_NORWEGIAN`
+- `resolve.AUTO_CAPTION_PORTUGUESE`
+- `resolve.AUTO_CAPTION_RUSSIAN`
+- `resolve.AUTO_CAPTION_SPANISH`
+- `resolve.AUTO_CAPTION_SWEDISH`
+
+### `presetType` Values
+
+- `resolve.AUTO_CAPTION_SUBTITLE_DEFAULT`
+- `resolve.AUTO_CAPTION_TELETEXT`
+- `resolve.AUTO_CAPTION_NETFLIX`
+
+### `lineBreakType` Values
+
+- `resolve.AUTO_CAPTION_LINE_SINGLE`
+- `resolve.AUTO_CAPTION_LINE_DOUBLE`
+
+## Looking up Render Settings
+
+This section covers the supported settings for the method `SetRenderSettings({settings})`.
+
+### `settings` Dictionary
+
+The parameter setting is a dictionary containing the following keys:
+
+- `"SelectAllFrames"`: `bool` (when set to `True`, the settings `MarkIn` and `MarkOut` are ignored)
+- `"MarkIn"`: `int`
+- `"MarkOut"`: `int`
+- `"TargetDir"`: `str`
+- `"CustomName"`: `str`
+- `"UniqueFilenameStyle"`: `int` (`0` for Prefix, `1` for Suffix)
+- `"ExportVideo"`: `bool`
+- `"ExportAudio"`: `bool`
+- `"FormatWidth"`: `int`
+- `"FormatHeight"`: `int`
+- `"FrameRate"`: `float` (examples: `23.976`, `24`)
+- `"PixelAspectRatio"`: `str` (for SD resolution: `"16_9"` or `"4_3"`) (for other resolutions: `"square"` or `"cinemascope"`)
+- `"VideoQuality"`: Possible values for the current codec (if applicable):
+  - `0` (`int`) - Sets quality to automatic
+  - `[1 -> MAX]` (`int`) - Sets input bit rate
+  - `["Least", "Low", "Medium", "High", "Best"]` (`str`) - Sets input quality level
+- `"AudioCodec"`: `str` (example: `"aac"`)
+- `"AudioBitDepth"`: `int`
+- `"AudioSampleRate"`: `int`
+- `"ColorSpaceTag"`: `str` (example: `"Same as Project"`, `"AstroDesign"`)
+- `"GammaTag"`: `str` (example: `"Same as Project"`, `"ACEScct"`)
+- `"ExportAlpha"`: `bool`
+- `"EncodingProfile"`: `str` (example: `"Main10"`) - Can only be set for H.264 and H.265.
+- `"MultiPassEncode"`: `bool` - Can only be set for H.264.
+- `"AlphaMode"`: `int` (`0` for Premultiplied, `1` for Straight) - Can only be set if `"ExportAlpha"` is `True`.
+- `"NetworkOptimization"`: `bool` - Only supported by QuickTime and MP4 formats.
+
+
+## Looking up Timeline Export Properties
+
+This section covers the parameters for the argument `Export(fileName, exportType, exportSubtype)`.
+
+### `exportType` Constants
+
+`exportType` can be one of the following constants:
+
+- `resolve.EXPORT_AAF`
+- `resolve.EXPORT_DRT`
+- `resolve.EXPORT_EDL`
+- `resolve.EXPORT_FCP_7_XML`
+- `resolve.EXPORT_FCPXML_1_8`
+- `resolve.EXPORT_FCPXML_1_9`
+- `resolve.EXPORT_FCPXML_1_10`
+- `resolve.EXPORT_HDR_10_PROFILE_A`
+- `resolve.EXPORT_HDR_10_PROFILE_B`
+- `resolve.EXPORT_TEXT_CSV`
+- `resolve.EXPORT_TEXT_TAB`
+- `resolve.EXPORT_DOLBY_VISION_VER_2_9`
+- `resolve.EXPORT_DOLBY_VISION_VER_4_0`
+- `resolve.EXPORT_DOLBY_VISION_VER_5_1`
+- `resolve.EXPORT_OTIO`
+- `resolve.EXPORT_ALE`
+- `resolve.EXPORT_ALE_CDL`
+
+### `exportSubtype` Enums
+
+`exportSubtype` can be one of the following enums:
+
+- `resolve.EXPORT_NONE`
+- `resolve.EXPORT_AAF_NEW`
+- `resolve.EXPORT_AAF_EXISTING`
+- `resolve.EXPORT_CDL`
+- `resolve.EXPORT_SDL`
+- `resolve.EXPORT_MISSING_CLIPS`
+
+**Notes:**
+
+- `exportSubtype` is a required parameter for `resolve.EXPORT_AAF` and `resolve.EXPORT_EDL`. For the rest of the `exportType`, `exportSubtype` is ignored.
+- When `exportType` is `resolve.EXPORT_AAF`, valid `exportSubtype` values are `resolve.EXPORT_AAF_NEW` and `resolve.EXPORT_AAF_EXISTING`.
+- When `exportType` is `resolve.EXPORT_EDL`, valid `exportSubtype` values are `resolve.EXPORT_CDL`, `resolve.EXPORT_SDL`, `resolve.EXPORT_MISSING_CLIPS`, and `resolve.EXPORT_NONE`.
+
+**Note:** Replace `'resolve.'` when using the constants above if a different Resolve class instance name is used.
+
+
+## Unsupported `exportType` Types
+
+Starting with DaVinci Resolve 18.1, the following export types are not supported:
+
+- `resolve.EXPORT_FCPXML_1_3`
+- `resolve.EXPORT_FCPXML_1_4`
+- `resolve.EXPORT_FCPXML_1_5`
+- `resolve.EXPORT_FCPXML_1_6`
+- `resolve.EXPORT_FCPXML_1_7`
+
+
+## Looking up Timeline Item Properties
+
+This section covers additional notes for the functions `TimelineItem:SetProperty` and `TimelineItem:GetProperty`. These functions are used to get and set the properties mentioned below.
+
+### Supported Keys and Accepted Values
+
+- **"Pan"**: Floating point values from `-4.0*width` to `4.0*width`
+- **"Tilt"**: Floating point values from `-4.0*height` to `4.0*height`
+- **"ZoomX"**: Floating point values from `0.0` to `100.0`
+- **"ZoomY"**: Floating point values from `0.0` to `100.0`
+- **"ZoomGang"**: Boolean value
+- **"RotationAngle"**: Floating point values from `-360.0` to `360.0`
+- **"AnchorPointX"**: Floating point values from `-4.0*width` to `4.0*width`
+- **"AnchorPointY"**: Floating point values from `-4.0*height` to `4.0*height`
+- **"Pitch"**: Floating point values from `-1.5` to `1.5`
+- **"Yaw"**: Floating point values from `-1.5` to `1.5`
+- **"FlipX"**: Boolean value for flipping horizontally
+- **"FlipY"**: Boolean value for flipping vertically
+- **"CropLeft"**: Floating point values from `0.0` to `width`
+- **"CropRight"**: Floating point values from `0.0` to `width`
+- **"CropTop"**: Floating point values from `0.0` to `height`
+- **"CropBottom"**: Floating point values from `0.0` to `height`
+- **"CropSoftness"**: Floating point values from `-100.0` to `100.0`
+- **"CropRetain"**: Boolean value for the "Retain Image Position" checkbox
+- **"DynamicZoomEase"**: A value from the following constants:
+  - `DYNAMIC_ZOOM_EASE_LINEAR = 0`
+  - `DYNAMIC_ZOOM_EASE_IN`
+  - `DYNAMIC_ZOOM_EASE_OUT`
+  - `DYNAMIC_ZOOM_EASE_IN_AND_OUT`
+- **"CompositeMode"**: A value from the following constants:
+  - `COMPOSITE_NORMAL = 0`
+  - `COMPOSITE_ADD`
+  - `COMPOSITE_SUBTRACT`
+  - `COMPOSITE_DIFF`
+  - `COMPOSITE_MULTIPLY`
+  - `COMPOSITE_SCREEN`
+  - `COMPOSITE_OVERLAY`
+  - `COMPOSITE_HARDLIGHT`
+  - `COMPOSITE_SOFTLIGHT`
+  - `COMPOSITE_DARKEN`
+  - `COMPOSITE_LIGHTEN`
+  - `COMPOSITE_COLOR_DODGE`
+  - `COMPOSITE_COLOR_BURN`
+  - `COMPOSITE_EXCLUSION`
+  - `COMPOSITE_HUE`
+  - `COMPOSITE_SATURATE`
+  - `COMPOSITE_COLORIZE`
+  - `COMPOSITE_LUMA_MASK`
+  - `COMPOSITE_DIVIDE`
+  - `COMPOSITE_LINEAR_DODGE`
+  - `COMPOSITE_LINEAR_BURN`
+  - `COMPOSITE_LINEAR_LIGHT`
+  - `COMPOSITE_VIVID_LIGHT`
+  - `COMPOSITE_PIN_LIGHT`
+  - `COMPOSITE_HARD_MIX`
+  - `COMPOSITE_LIGHTER_COLOR`
+  - `COMPOSITE_DARKER_COLOR`
+  - `COMPOSITE_FOREGROUND`
+  - `COMPOSITE_ALPHA`
+  - `COMPOSITE_INVERTED_ALPHA`
+  - `COMPOSITE_LUM`
+  - `COMPOSITE_INVERTED_LUM`
+- **"Opacity"**: Floating point value from `0.0` to `100.0`
+- **"Distortion"**: Floating point value from `-1.0` to `1.0`
+- **"RetimeProcess"**: A value from the following constants:
+  - `RETIME_USE_PROJECT = 0`
+  - `RETIME_NEAREST`
+  - `RETIME_FRAME_BLEND`
+  - `RETIME_OPTICAL_FLOW`
+- **"MotionEstimation"**: A value from the following constants:
+  - `MOTION_EST_USE_PROJECT = 0`
+  - `MOTION_EST_STANDARD_FASTER`
+  - `MOTION_EST_STANDARD_BETTER`
+  - `MOTION_EST_ENHANCED_FASTER`
+  - `MOTION_EST_ENHANCED_BETTER`
+  - `MOTION_EST_SPEED_WARP_BETTER`
+  - `MOTION_EST_SPEED_WARP_FASTER`
+- **"Scaling"**: A value from the following constants:
+  - `SCALE_USE_PROJECT = 0`
+  - `SCALE_CROP`
+  - `SCALE_FIT`
+  - `SCALE_FILL`
+  - `SCALE_STRETCH`
+- **"ResizeFilter"**: A value from the following constants:
+  - `RESIZE_FILTER_USE_PROJECT = 0`
+  - `RESIZE_FILTER_SHARPER`
+  - `RESIZE_FILTER_SMOOTHER`
+  - `RESIZE_FILTER_BICUBIC`
+  - `RESIZE_FILTER_BILINEAR`
+  - `RESIZE_FILTER_BESSEL`
+  - `RESIZE_FILTER_BOX`
+  - `RESIZE_FILTER_CATMULL_ROM`
+  - `RESIZE_FILTER_CUBIC`
+  - `RESIZE_FILTER_GAUSSIAN`
+  - `RESIZE_FILTER_LANCZOS`
+  - `RESIZE_FILTER_MITCHELL`
+  - `RESIZE_FILTER_NEAREST_NEIGHBOR`
+  - `RESIZE_FILTER_QUADRATIC`
+  - `RESIZE_FILTER_SINC`
+  - `RESIZE_FILTER_LINEAR`
+
+### Additional Notes
+
+- Values beyond the range will be clipped.
+- `width` and `height` are the same as the UI max limits.
+
+### Passing Arguments
+
+- The arguments can be passed as a key-value pair or grouped together into a dictionary (for Python) or table (for Lua) and passed as a single argument.
+- Getting the values for keys that use constants will return the number corresponding to the constant.
+
+
+## ExportLUT Notes
+
+This section covers additional notes for `TimelineItem.ExportLUT(exportType, path)`.
+
+### Supported `exportType` Values
+
+The supported values for `exportType` (enum) are:
+
+- `resolve.EXPORT_LUT_17PTCUBE`
+- `resolve.EXPORT_LUT_33PTCUBE`
+- `resolve.EXPORT_LUT_65PTCUBE`
+- `resolve.EXPORT_LUT_PANASONICVLUT`
+
+
+## Deprecated Resolve API Functions
+
+The following API functions are deprecated.
+
+### ProjectManager
+
+```python
+GetProjectsInCurrentFolder() ⟶ dict
+# Returns a dict of project names in the current folder.
+
+GetFoldersInCurrentFolder() ⟶ dict
+# Returns a dict of folder names in the current folder.
+```
+
+### Project
+
+```python
+GetPresets() ⟶ dict
+# Returns a dict of presets and their information.
+
+GetRenderJobs() ⟶ dict
+# Returns a dict of render jobs and their information.
+
+GetRenderPresets() ⟶ dict
+# Returns a dict of render presets and their information.
+```
+
+### MediaStorage
+
+```python
+GetMountedVolumes() ⟶ dict
+# Returns a dict of folder paths corresponding to mounted volumes displayed in Resolve’s Media Storage.
+
+GetSubFolders(folderPath) ⟶ dict
+# Returns a dict of folder paths in the given absolute folder path.
+
+GetFiles(folderPath) ⟶ dict
+# Returns a dict of media and file listings in the given absolute folder path. Note that media listings may be logically consolidated entries.
+
+AddItemsToMediaPool(item1, item2, ...) ⟶ dict
+# Adds specified file/folder paths from Media Storage into the current Media Pool folder. Input is one or more file/folder paths. Returns a dict of the MediaPoolItems created.
+
+AddItemsToMediaPool([items...]) ⟶ dict
+# Adds specified file/folder paths from Media Storage into the current Media Pool folder. Input is an array of file/folder paths. Returns a dict of the MediaPoolItems created.
+```
+
+### Folder
+
+```python
+GetClips() ⟶ dict
+# Returns a dict of clips (items) within the folder.
+
+GetSubFolders() ⟶ dict
+# Returns a dict of subfolders in the folder.
+```
+
+### MediaPoolItem
+
+```python
+GetFlags() ⟶ dict
+# Returns a dict of flag colors assigned to the item.
+```
+
+### Timeline
+
+```python
+GetItemsInTrack(trackType, index) ⟶ dict
+# Returns a dict of Timeline items on the video or audio track (based on trackType) at the specified index.
+```
+
+### TimelineItem
+
+```python
+GetFusionCompNames() ⟶ dict
+# Returns a dict of Fusion composition names associated with the timeline item.
+
+GetFlags() ⟶ dict
+# Returns a dict of flag colors assigned to the item.
+
+GetVersionNames(versionType) ⟶ dict
+# Returns a dict of version names by provided versionType: 0 - local, 1 - remote.
+
+GetNumNodes() ⟶ int
+# Returns the number of nodes in the current graph for the timeline item.
+
+SetLUT(nodeIndex, lutPath) ⟶ bool
+# Sets LUT on the node mapping the node index provided, 1 <= nodeIndex <= total number of nodes.
+# The lutPath can be an absolute path, or a relative path (based off custom LUT paths or the master LUT path).
+# The operation is successful for valid LUT paths that Resolve has already discovered (see Project.RefreshLUTList).
+
+GetLUT(nodeIndex) ⟶ str
+# Gets the relative LUT path based on the node index provided, 1 <= nodeIndex <= total number of nodes.
+
+GetNodeLabel(nodeIndex) ⟶ str
+# Returns the label of the node at nodeIndex.
+```
+
+## Unsupported Resolve API Functions
+
+The following API (functions and parameters) are no longer supported. Use job IDs instead of indices.
+
+### Project
+
+```python
+StartRendering(index1, index2, ...) ⟶ Bool
+# Please use unique job IDs (string) instead of indices.
+
+StartRendering([idxs...]) ⟶ Bool
+# Please use unique job IDs (string) instead of indices.
+
+DeleteRenderJobByIndex(idx) ⟶ Bool
+# Please use unique job IDs (string) instead of indices.
+
+GetRenderJobStatus(idx) ⟶ dict
+# Please use unique job IDs (string) instead of indices.
+
+GetSetting and SetSetting ⟶ dict
+# The settingName 'videoMonitorUseRec601For422SDI' is now replaced with 'videoMonitorUseMatrixOverrideFor422SDI' and 'videoMonitorMatrixOverrideFor422SDI'.
+# The settingName 'perfProxyMediaOn' is now replaced with 'perfProxyMediaMode' which takes values: 0 - disabled, 1 - when available, 2 - when source not available.
+```
