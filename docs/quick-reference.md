@@ -1,3 +1,28 @@
+## Resolve methods
+```python
+DeleteLayoutPreset(presetName) ⟶ bool
+ExportBurnInPreset(presetName, exportPath) ⟶ bool
+ExportLayoutPreset(presetName, presetFilePath) ⟶ bool
+ExportRenderPreset(presetName, exportPath) ⟶ bool
+Fusion() ⟶ Fusion
+GetCurrentPage() ⟶ str
+GetKeyframeMode() ⟶ keyframeMode
+GetMediaStorage() ⟶ MediaStorage
+GetProductName() ⟶ str
+GetProjectManager() ⟶ ProjectManager
+GetVersion() ⟶ list
+GetVersionString() ⟶ str
+ImportBurnInPreset(presetPath) ⟶ bool
+ImportLayoutPreset(presetFilePath, presetName=None) ⟶ bool
+ImportRenderPreset(presetPath) ⟶ bool
+LoadLayoutPreset(presetName) ⟶ bool
+OpenPage(pageName) ⟶ bool
+Quit() ⟶ None
+SaveLayoutPreset(presetName) ⟶ bool
+SetKeyframeMode(keyframeMode) ⟶ bool
+UpdateLayoutPreset(presetName) ⟶ bool
+```
+
 ## ProjectManager methods
 ```python
 ArchiveProject(projectName, filePath, isArchiveSrcMedia=True, isArchiveRenderCache=True, isArchiveProxyMedia=False) ⟶ bool
